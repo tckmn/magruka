@@ -84,6 +84,10 @@ struct magruka *magruka_init() {
         }
     }
 
+    // place player
+    m->player.x = m->mapw / 2;
+    m->player.y = 0;
+
     // load assets
     if (load_assets(m)) FAIL("failed to load assets");
 
@@ -99,8 +103,13 @@ void magruka_main_loop(struct magruka *m) {
                 return;
             case SDL_KEYDOWN:
                 switch (e.key.keysym.sym) {
-                case 'q':
-                    return;
+                case 'q': return;
+                case 'u': m->player.x -= 1; break;
+                case 'i': m->player.y -= 1; break;
+                case 'o': m->player.x += 1; m->player.y -= 1; break;
+                case 'j': m->player.x -= 1; m->player.y += 1; break;
+                case 'k': m->player.y += 1; break;
+                case 'l': m->player.x += 1; break;
                 }
                 break;
             default:
@@ -112,15 +121,21 @@ void magruka_main_loop(struct magruka *m) {
         // start rendering stuff
         SDL_RenderClear(m->rend);
 
+        // draw map
         for (int x = 0; x < m->mapw; ++x) {
             for (int y = 0; y < m->maph; ++y) {
                 draw_hex(m, x, y, m->map[x][y]);
+                draw_hex(m, x, y + 10, m->map[x][y] ? (m->map[x][y]%3)+1 : 0);
+                draw_hex(m, x + 10, y, m->map[x][y] ? ((m->map[x][y]+1)%3)+1 : 0);
             }
         }
 
-        draw_hex(m, m->mapw / 2, 0, 4);
+        // draw player
+        draw_hex(m, m->player.x, m->player.y, 4);
+        draw_hex(m, m->player.x + 10, m->player.y, 4);
+        draw_hex(m, m->player.x, m->player.y + 10, 4);
 
-        // draw everything
+        // render everything
         SDL_RenderPresent(m->rend);
     }
 }
