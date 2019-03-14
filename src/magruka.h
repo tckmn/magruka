@@ -16,9 +16,8 @@ struct magruka {
     int maph;
     SDL_Point player;
     struct {
-        SDL_Texture *hex;
-        SDL_Rect hexclip;
-        SDL_Rect hexdest;
+        SDL_Texture *spritesheet;
+        SDL_Rect wizclip;
     } img;
 };
 

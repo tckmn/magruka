@@ -3,11 +3,9 @@
 
 #include "magruka.h"
 
-void draw_hex(struct magruka *m, int x, int y, int n) {
-    m->img.hexclip.y = 26*n;
-    m->img.hexdest.x = 10 + 22*x;
-    m->img.hexdest.y = 10 + 13*x + 26*y;
-    SDL_RenderCopy(m->rend, m->img.hex, &m->img.hexclip, &m->img.hexdest);
+void draw(struct magruka *m, int x, int y, SDL_Rect *clip) {
+    SDL_Rect dest = {x, y, clip->w, clip->h};
+    SDL_RenderCopy(m->rend, m->img.spritesheet, clip, &dest);
 }
 
 /*
@@ -15,25 +13,22 @@ void draw_hex(struct magruka *m, int x, int y, int n) {
  */
 int load_assets(struct magruka *m) {
     SDL_Surface *tmp;
-    tmp = IMG_Load("assets/img/hex.png");
+    tmp = IMG_Load("assets/img/spritesheet.png");
     if (tmp) {
         SDL_SetColorKey(tmp, SDL_TRUE, SDL_MapRGB(tmp->format, 0xff, 0x00, 0xff));
-        m->img.hex = SDL_CreateTextureFromSurface(m->rend, tmp);
+        m->img.spritesheet = SDL_CreateTextureFromSurface(m->rend, tmp);
         SDL_FreeSurface(tmp);
-        if (!m->img.hex) {
-            fprintf(stderr, "could not optimize hex image\n(SDL error: %s)\n",
+        if (!m->img.spritesheet) {
+            fprintf(stderr, "could not optimize spritesheet image\n(SDL error: %s)\n",
                     SDL_GetError());
             return 1;
         }
     } else {
-        fprintf(stderr, "could not load hex image\n(SDL/IMG error: %s)\n",
+        fprintf(stderr, "could not load spritesheet image\n(SDL/IMG error: %s)\n",
                 IMG_GetError());
         return 1;
     }
-    m->img.hexclip.w = m->img.hexdest.w = 30;
-    m->img.hexclip.h = m->img.hexdest.h = 26;
-    m->img.hexclip.x = m->img.hexdest.x = 0;
-    m->img.hexclip.y = m->img.hexdest.y = 0;
+    m->img.wizclip = (SDL_Rect){0, 0, 16, 37};
     return 0;
 }
 
@@ -104,12 +99,12 @@ void magruka_main_loop(struct magruka *m) {
             case SDL_KEYDOWN:
                 switch (e.key.keysym.sym) {
                 case 'q': return;
-                case 'u': m->player.x -= 1; break;
-                case 'i': m->player.y -= 1; break;
-                case 'o': m->player.x += 1; m->player.y -= 1; break;
-                case 'j': m->player.x -= 1; m->player.y += 1; break;
-                case 'k': m->player.y += 1; break;
-                case 'l': m->player.x += 1; break;
+                case 'u': --m->player.x; break;
+                case 'i': --m->player.y; break;
+                case 'o': ++m->player.x; --m->player.y; break;
+                case 'j': --m->player.x; ++m->player.y; break;
+                case 'k': ++m->player.y; break;
+                case 'l': ++m->player.x; break;
                 }
                 break;
             default:
@@ -121,19 +116,7 @@ void magruka_main_loop(struct magruka *m) {
         // start rendering stuff
         SDL_RenderClear(m->rend);
 
-        // draw map
-        for (int x = 0; x < m->mapw; ++x) {
-            for (int y = 0; y < m->maph; ++y) {
-                draw_hex(m, x, y, m->map[x][y]);
-                draw_hex(m, x, y + 10, m->map[x][y] ? (m->map[x][y]%3)+1 : 0);
-                draw_hex(m, x + 10, y, m->map[x][y] ? ((m->map[x][y]+1)%3)+1 : 0);
-            }
-        }
-
-        // draw player
-        draw_hex(m, m->player.x, m->player.y, 4);
-        draw_hex(m, m->player.x + 10, m->player.y, 4);
-        draw_hex(m, m->player.x, m->player.y + 10, 4);
+        draw(m, 0, 0, &m->img.wizclip);
 
         // render everything
         SDL_RenderPresent(m->rend);
@@ -141,7 +124,7 @@ void magruka_main_loop(struct magruka *m) {
 }
 
 void magruka_destroy(struct magruka *m) {
-    SDL_DestroyTexture(m->img.hex);
+    SDL_DestroyTexture(m->img.spritesheet);
     SDL_DestroyWindow(m->win);
     SDL_Quit();
     for (int x = 0; x < m->mapw; ++x) {
