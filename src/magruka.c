@@ -3,8 +3,6 @@
 
 #include "magruka.h"
 
-#define SCALE_FACTOR 4
-
 void draw(struct magruka *m, int x, int y, SDL_Rect clip) {
     SDL_Rect dest = {x, y, clip.w, clip.h};
     SDL_RenderCopy(m->rend, m->img.spritesheet, &clip, &dest);
@@ -36,8 +34,10 @@ int load_assets(struct magruka *m) {
                 IMG_GetError());
         return 1;
     }
-    m->img.wiz = (SDL_Rect){0*SCALE_FACTOR, 0*SCALE_FACTOR, 16*SCALE_FACTOR, 37*SCALE_FACTOR};
-    m->img.brick = (SDL_Rect){0*SCALE_FACTOR, 37*SCALE_FACTOR, 18*SCALE_FACTOR, 16*SCALE_FACTOR};
+    m->img.wiz      = R(0,  0,  16, 37);
+    m->img.wall     = R(0,  37, 18, 16);
+    m->img.floor    = R(18, 37, 18, 16);
+    m->img.floortop = R(36, 37, 18, 16);
     return 0;
 }
 
@@ -102,17 +102,26 @@ void magruka_main_loop(struct magruka *m) {
         SDL_RenderClear(m->rend);
 
         // draw background tiles
-        for (int x = 0; x < SCREEN_WIDTH; x += m->img.brick.w) {
-            for (int y = 0; y < SCREEN_HEIGHT; y += m->img.brick.h) {
-                draw(m, x, y, m->img.brick);
+        for (int x = 0; x < SCREEN_WIDTH; x += m->img.wall.w) {
+            for (int y = 0; y < SCREEN_HEIGHT; y += m->img.wall.h) {
+                draw(m, x, y, m->img.wall);
             }
+        }
+
+        // draw foreground floor
+        int top = 1;
+        for (int y = FLOOR_POS; y < SCREEN_HEIGHT; y += m->img.floor.h) {
+            for (int x = 0; x < SCREEN_WIDTH; x += m->img.floor.w) {
+                draw(m, x, y, top ? m->img.floortop : m->img.floor);
+            }
+            top = 0;
         }
 
         // draw temporary wizard
         int asdf = 8;
         ++frame;
         frame %= 7*asdf;
-        anim(m, 100, 100, m->img.wiz, abs(3-frame/asdf));
+        anim(m, 100, FLOOR_POS - m->img.wiz.h, m->img.wiz, abs(3-frame/asdf));
 
         // render everything
         SDL_RenderPresent(m->rend);

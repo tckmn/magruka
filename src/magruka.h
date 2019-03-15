@@ -7,6 +7,11 @@
 #define SCREEN_WIDTH 800
 #define SCREEN_HEIGHT 800
 
+#define FLOOR_POS ((SCREEN_HEIGHT)*7/8)
+
+#define SCALE_FACTOR 4
+#define R(x,y,w,h) ((SDL_Rect){(x)*SCALE_FACTOR,(y)*SCALE_FACTOR,(w)*SCALE_FACTOR,(h)*SCALE_FACTOR})
+
 struct magruka {
     SDL_Window *win;
     SDL_Surface *surf;
@@ -14,7 +19,9 @@ struct magruka {
     struct {
         SDL_Texture *spritesheet;
         SDL_Rect wiz;
-        SDL_Rect brick;
+        SDL_Rect wall;
+        SDL_Rect floor;
+        SDL_Rect floortop;
     } img;
 };
 
