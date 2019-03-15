@@ -11,10 +11,6 @@ struct magruka {
     SDL_Window *win;
     SDL_Surface *surf;
     SDL_Renderer *rend;
-    int **map;
-    int mapw;
-    int maph;
-    SDL_Point player;
     struct {
         SDL_Texture *spritesheet;
         SDL_Rect wizclip;

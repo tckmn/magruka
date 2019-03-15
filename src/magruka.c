@@ -72,25 +72,6 @@ struct magruka *magruka_init() {
     if (!m->rend) FAIL("could not create hardware renderer");
     SDL_SetRenderDrawColor(m->rend, 0x00, 0x00, 0x00, 0xff);
 
-    // generate map
-    m->mapw = 9;
-    m->maph = 9;
-    m->map = malloc(m->mapw * sizeof *m->map);
-    for (int x = 0; x < m->mapw; ++x) {
-        m->map[x] = malloc(m->maph * sizeof *m->map[x]);
-        for (int y = 0; y < m->maph; ++y) {
-            if (x+y < m->mapw/2 || x+y >= m->mapw+m->mapw/2) {
-                m->map[x][y] = 0;
-            } else {
-                m->map[x][y] = 1 + rand()%3;
-            }
-        }
-    }
-
-    // place player
-    m->player.x = m->mapw / 2;
-    m->player.y = 0;
-
     // load assets
     if (load_assets(m)) FAIL("failed to load assets");
 
@@ -108,12 +89,6 @@ void magruka_main_loop(struct magruka *m) {
             case SDL_KEYDOWN:
                 switch (e.key.keysym.sym) {
                 case 'q': return;
-                case 'u': --m->player.x; break;
-                case 'i': --m->player.y; break;
-                case 'o': ++m->player.x; --m->player.y; break;
-                case 'j': --m->player.x; ++m->player.y; break;
-                case 'k': ++m->player.y; break;
-                case 'l': ++m->player.x; break;
                 }
                 break;
             default:
@@ -139,9 +114,5 @@ void magruka_destroy(struct magruka *m) {
     SDL_DestroyTexture(m->img.spritesheet);
     SDL_DestroyWindow(m->win);
     SDL_Quit();
-    for (int x = 0; x < m->mapw; ++x) {
-        free(m->map[x]);
-    }
-    free(m->map);
     free(m);
 }
