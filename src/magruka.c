@@ -32,6 +32,22 @@ void anim(struct magruka *m, int x, int y, SDL_Rect clip, int offs) {
     SDL_RenderCopy(m->rend, m->img.spritesheet, &src, &dest);
 }
 
+void write(struct magruka *m, int x, int y, char *text) {
+    SDL_Rect src = {m->img.letters.x, m->img.letters.y, 0, m->img.letterh * SCALE_FACTOR};
+    SDL_Rect dest = {x, y, 0, src.h};
+    for (; *text; ++text) {
+        if (*text == ' ') {
+            dest.x += 2*SCALE_FACTOR + SCALE_FACTOR/2;
+        } else {
+            int ch = *text - 'A';
+            src.x = m->img.letters.x + m->img.letterx[ch] * SCALE_FACTOR;
+            src.w = dest.w = m->img.letterw[ch] * SCALE_FACTOR;
+            SDL_RenderCopy(m->rend, m->img.spritesheet, &src, &dest);
+            dest.x += dest.w + SCALE_FACTOR/2;
+        }
+    }
+}
+
 /*
  * load all the data in the assets directory into memory
  */
@@ -52,10 +68,43 @@ int load_assets(struct magruka *m) {
                 IMG_GetError());
         return 1;
     }
+
     m->img.wiz      = R(0,  0,  16, 37);
     m->img.wall     = R(0,  37, 18, 16);
     m->img.floor    = R(18, 37, 18, 16);
     m->img.floortop = R(36, 37, 18, 16);
+    m->img.letters  = P(0, 53);
+    m->img.letterw[0] = 3;
+    m->img.letterw[1] = 3;
+    m->img.letterw[2] = 3;
+    m->img.letterw[3] = 3;
+    m->img.letterw[4] = 3;
+    m->img.letterw[5] = 3;
+    m->img.letterw[6] = 3;
+    m->img.letterw[7] = 3;
+    m->img.letterw[8] = 1;
+    m->img.letterw[9] = 3;
+    m->img.letterw[10] = 3;
+    m->img.letterw[11] = 3;
+    m->img.letterw[12] = 5;
+    m->img.letterw[13] = 4;
+    m->img.letterw[14] = 3;
+    m->img.letterw[15] = 3;
+    m->img.letterw[16] = 4;
+    m->img.letterw[17] = 3;
+    m->img.letterw[18] = 3;
+    m->img.letterw[19] = 3;
+    m->img.letterw[20] = 3;
+    m->img.letterw[21] = 3;
+    m->img.letterw[22] = 5;
+    m->img.letterw[23] = 3;
+    m->img.letterw[24] = 3;
+    m->img.letterw[25] = 3;
+    m->img.letterh = 5;
+    for (int x = 0, i = 0; i < 26; x += m->img.letterw[i], i++) {
+        m->img.letterx[i] = x;
+    }
+
     return 0;
 }
 
@@ -140,6 +189,9 @@ void magruka_main_loop(struct magruka *m) {
         ++frame;
         frame %= 7*asdf;
         anim(m, 100, FLOOR_POS - m->img.wiz.h, m->img.wiz, abs(3-frame/asdf));
+
+        // draw temporary text
+        write(m, 100, 100, "PLAYER ONE");
 
         // render everything
         SDL_RenderPresent(m->rend);

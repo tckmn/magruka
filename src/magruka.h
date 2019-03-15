@@ -28,6 +28,7 @@
 #define FLOOR_POS ((SCREEN_HEIGHT)*7/8)
 
 #define SCALE_FACTOR 4
+#define P(x,y)     ((SDL_Point){(x)*SCALE_FACTOR,(y)*SCALE_FACTOR})
 #define R(x,y,w,h) ((SDL_Rect){(x)*SCALE_FACTOR,(y)*SCALE_FACTOR,(w)*SCALE_FACTOR,(h)*SCALE_FACTOR})
 
 struct magruka {
@@ -40,6 +41,10 @@ struct magruka {
         SDL_Rect wall;
         SDL_Rect floor;
         SDL_Rect floortop;
+        SDL_Point letters;
+        int letterw[26];
+        int letterh;
+        int letterx[26];
     } img;
 };
 
