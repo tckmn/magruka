@@ -36,7 +36,8 @@ int load_assets(struct magruka *m) {
                 IMG_GetError());
         return 1;
     }
-    m->img.wizclip = (SDL_Rect){0*SCALE_FACTOR, 0*SCALE_FACTOR, 16*SCALE_FACTOR, 37*SCALE_FACTOR};
+    m->img.wiz = (SDL_Rect){0*SCALE_FACTOR, 0*SCALE_FACTOR, 16*SCALE_FACTOR, 37*SCALE_FACTOR};
+    m->img.brick = (SDL_Rect){0*SCALE_FACTOR, 37*SCALE_FACTOR, 18*SCALE_FACTOR, 16*SCALE_FACTOR};
     return 0;
 }
 
@@ -70,7 +71,7 @@ struct magruka *magruka_init() {
     // create renderer
     m->rend = SDL_CreateRenderer(m->win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!m->rend) FAIL("could not create hardware renderer");
-    SDL_SetRenderDrawColor(m->rend, 0x10, 0x10, 0x10, 0xff);
+    SDL_SetRenderDrawColor(m->rend, 0x00, 0x00, 0x00, 0xff);
 
     // load assets
     if (load_assets(m)) FAIL("failed to load assets");
@@ -100,10 +101,18 @@ void magruka_main_loop(struct magruka *m) {
         // start rendering stuff
         SDL_RenderClear(m->rend);
 
+        // draw background tiles
+        for (int x = 0; x < SCREEN_WIDTH; x += m->img.brick.w) {
+            for (int y = 0; y < SCREEN_HEIGHT; y += m->img.brick.h) {
+                draw(m, x, y, m->img.brick);
+            }
+        }
+
+        // draw temporary wizard
         int asdf = 8;
         ++frame;
         frame %= 7*asdf;
-        anim(m, 100, 100, m->img.wizclip, abs(3-frame/asdf));
+        anim(m, 100, 100, m->img.wiz, abs(3-frame/asdf));
 
         // render everything
         SDL_RenderPresent(m->rend);

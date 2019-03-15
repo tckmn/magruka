@@ -13,7 +13,8 @@ struct magruka {
     SDL_Renderer *rend;
     struct {
         SDL_Texture *spritesheet;
-        SDL_Rect wizclip;
+        SDL_Rect wiz;
+        SDL_Rect brick;
     } img;
 };
 
