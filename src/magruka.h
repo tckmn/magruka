@@ -21,6 +21,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 
 #define SCREEN_WIDTH 960
 #define SCREEN_HEIGHT 540
@@ -30,8 +31,8 @@
 #define SCALE1 4
 #define SCALE2 2
 #define HEIGHT1 (185*SCALE1)
-#define P(x,y)      ((SDL_Point){(x)*SCALE1,(y)*SCALE1})
-#define R(x,y,w,h)  ((SDL_Rect){(x)*SCALE1,(y)*SCALE1,(w)*SCALE1,(h)*SCALE1})
+#define P1(x,y)      ((SDL_Point){(x)*SCALE1,(y)*SCALE1})
+#define R1(x,y,w,h)  ((SDL_Rect){(x)*SCALE1,(y)*SCALE1,(w)*SCALE1,(h)*SCALE1})
 #define P2(x,y)     ((SDL_Point){(x)*SCALE2,HEIGHT1+(y)*SCALE2})
 #define R2(x,y,w,h) ((SDL_Rect){(x)*SCALE2,HEIGHT1+(y)*SCALE2,(w)*SCALE2,(h)*SCALE2})
 

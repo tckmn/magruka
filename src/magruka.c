@@ -33,15 +33,20 @@ void anim(struct magruka *m, int x, int y, SDL_Rect clip, int offs) {
 }
 
 void write(struct magruka *m, int x, int y, char *text) {
-    SDL_Rect src = {m->img.letters.x, m->img.letters.y, 0, m->img.letterh * SCALE2};
+    SDL_Rect src = {m->img.letters.x, m->img.letters.y, 0, m->img.letterh};
     SDL_Rect dest = {x, y, 0, src.h};
     for (; *text; ++text) {
         if (*text == ' ') {
             dest.x += 2*SCALE2 + SCALE2/2;
+        } else if (*text == '\n') {
+            dest.x = x;
+            dest.y += m->img.letterh;
         } else {
-            int ch = *text - 'A';
-            src.x = m->img.letters.x + m->img.letterx[ch] * SCALE2;
-            src.w = dest.w = m->img.letterw[ch] * SCALE2;
+            int ch = 'A' <= *text && *text <= 'Z' ? *text - 'A' :
+                     'a' <= *text && *text <= 'z' ? *text - 'a' + 26 :
+                     '0' <= *text && *text <= '9' ? *text - '0' + 52 : 0;
+            src.x = m->img.letters.x + m->img.letterx[ch];
+            src.w = dest.w = m->img.letterw[ch];
             SDL_RenderCopy(m->rend, m->img.spritesheet, &src, &dest);
             dest.x += dest.w + SCALE2/2;
         }
@@ -49,15 +54,15 @@ void write(struct magruka *m, int x, int y, char *text) {
 }
 
 void writebig(struct magruka *m, int x, int y, char *text) {
-    SDL_Rect src = {m->img.bigletters.x, m->img.bigletters.y, 0, m->img.bigletterh * SCALE1};
+    SDL_Rect src = {m->img.bigletters.x, m->img.bigletters.y, 0, m->img.bigletterh};
     SDL_Rect dest = {x, y, 0, src.h};
     for (; *text; ++text) {
         if (*text == ' ') {
             dest.x += 2*SCALE1 + SCALE1/2;
         } else {
             int ch = *text - 'A';
-            src.x = m->img.bigletters.x + m->img.bigletterx[ch] * SCALE1;
-            src.w = dest.w = m->img.bigletterw[ch] * SCALE1;
+            src.x = m->img.bigletters.x + m->img.bigletterx[ch];
+            src.w = dest.w = m->img.bigletterw[ch];
             SDL_RenderCopy(m->rend, m->img.spritesheet, &src, &dest);
             dest.x += dest.w + SCALE1/2;
         }
@@ -85,12 +90,12 @@ int load_assets(struct magruka *m) {
         return 1;
     }
 
-    m->img.wiz      = R(0,  0,  16, 37);
-    m->img.wall     = R(0,  37, 18, 16);
-    m->img.floor    = R(18, 37, 18, 16);
-    m->img.floortop = R(36, 37, 18, 16);
+    m->img.wiz      = R1(0,  0,  16, 37);
+    m->img.wall     = R1(0,  37, 18, 16);
+    m->img.floor    = R1(18, 37, 18, 16);
+    m->img.floortop = R1(36, 37, 18, 16);
 
-    m->img.letters    = P2(0, 0);
+    m->img.letters     = P2(0, 0);
     m->img.letterw[0]  = 4; m->img.letterw[1]  = 4; m->img.letterw[2]  = 4;
     m->img.letterw[3]  = 4; m->img.letterw[4]  = 4; m->img.letterw[5]  = 4;
     m->img.letterw[6]  = 4; m->img.letterw[7]  = 4; m->img.letterw[8]  = 3;
@@ -112,12 +117,13 @@ int load_assets(struct magruka *m) {
     m->img.letterw[54] = 4; m->img.letterw[55] = 4; m->img.letterw[56] = 4;
     m->img.letterw[57] = 4; m->img.letterw[58] = 4; m->img.letterw[59] = 4;
     m->img.letterw[60] = 4; m->img.letterw[61] = 4;
-    m->img.letterh = 10;
-    for (int x = 0, i = 0; i < 62; x += m->img.letterw[i] + 1, i++) {
+    m->img.letterh = 10 * SCALE2;
+    for (int x = 0, i = 0; i < 62; x += m->img.letterw[i] + SCALE2, i++) {
+        m->img.letterw[i] *= SCALE2;
         m->img.letterx[i] = x;
     }
 
-    m->img.bigletters    = P(0, 53);
+    m->img.bigletters     = P1(0, 53);
     m->img.bigletterw[0]  = 3; m->img.bigletterw[1]  = 3; m->img.bigletterw[2]  = 3;
     m->img.bigletterw[3]  = 3; m->img.bigletterw[4]  = 3; m->img.bigletterw[5]  = 3;
     m->img.bigletterw[6]  = 3; m->img.bigletterw[7]  = 3; m->img.bigletterw[8]  = 1;
@@ -127,8 +133,9 @@ int load_assets(struct magruka *m) {
     m->img.bigletterw[18] = 3; m->img.bigletterw[19] = 3; m->img.bigletterw[20] = 3;
     m->img.bigletterw[21] = 3; m->img.bigletterw[22] = 5; m->img.bigletterw[23] = 3;
     m->img.bigletterw[24] = 3; m->img.bigletterw[25] = 3;
-    m->img.bigletterh = 5;
+    m->img.bigletterh = 5 * SCALE1;
     for (int x = 0, i = 0; i < 26; x += m->img.bigletterw[i], i++) {
+        m->img.bigletterw[i] *= SCALE1;
         m->img.bigletterx[i] = x;
     }
 
@@ -218,8 +225,7 @@ void magruka_main_loop(struct magruka *m) {
         anim(m, 100, FLOOR_POS - m->img.wiz.h, m->img.wiz, abs(3-frame/asdf));
 
         // draw temporary text
-        write(m, 10, 10, "PLAYER ONE         F P S F W    SUMMON TROLL          W F P S F W      SUMMON GIANT");
-        writebig(m, 10, 30, "PLAYER ONE         F P S F W    SUMMON TROLL          W F P S F W      SUMMON GIANT");
+        write(m, 10, 10, "C D P W      Dispel magic               P S D F          Charm person\nC S W W S    Summon elemental           P S F W          Summon ogre\nC w          Magic mirror               P W P F S S S D  Finger of death\nD F F D D    Lightning bolt             P W P W W C      Haste\nD F P W      Cure heavy wounds          S D              Missile\nD F W        Cure light wounds          S F W            Summon goblin\nD P P        Amnesia                    S P F            Anti spell\nD S F        Confusion                  S P F P S D W    Permanency\nD S F F F C  Disease                    S P P C          Time stop\nD W F F d    Blindness                  S S F P          Resist cold\nD W S S S P  Delayed effect             S W D            Fear\nD W W F W C  Raise dead                 S W W C          Fire storm\nD W W F W D  Poison                     W D D C          Lightning bolt\nF F F        Paralysis                  W F P            Cause light wounds\nF P S F W    Summon troll               W F P S F W      Summon giant\nF S S D D    Fireball                   W P F D          Cause heavy wounds\nP            Shield                     W P P            Counter spell\np            Surrender                  W S S C          Ice storm\nP D W P      Remove enchantment         W W F P          Resist heat\nP P w s      Invisibility               W W P            Protection from evil\nP S D D      Charm monster              W W S            Counter spell");
 
         // render everything
         SDL_RenderPresent(m->rend);

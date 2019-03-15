@@ -2,7 +2,7 @@ NAME = magruka
 TARGET = bin/$(NAME)
 MANPAGE = $(NAME).1
 PREFIX ?= /usr/local
-LIBS = -lm -lSDL2 -lSDL2_image
+LIBS = -lm -lSDL2 -lSDL2_image -lSDL2_ttf
 .PHONY: all debug release install clean
 
 all: $(TARGET) assets/img/spritesheet.png
