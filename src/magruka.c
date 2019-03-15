@@ -17,6 +17,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 
 #include "magruka.h"
@@ -53,14 +54,33 @@ void write(struct magruka *m, int x, int y, char *text) {
     }
 }
 
-SDL_Texture* gentext(struct magruka *m, char *text, int *w, int *h) {
-    // TODO error handling?
+/*
+ * returns a textimg with a NULL texture on error
+ */
+struct textimg gentext(struct magruka *m, char *text) {
+    struct textimg img;
+    img.texture = 0;
     SDL_Surface *tmp = TTF_RenderText_Solid(m->font, text, (SDL_Color){0xff, 0xff, 0xff, 0xff});
-    *w = tmp->w;
-    *h = tmp->h;
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(m->rend, tmp);
+    if (!tmp) {
+        fprintf(stderr, "could not render text image\n(SDL/TTF error: %s)\n",
+                TTF_GetError());
+        return img;
+    }
+    img.w = tmp->w;
+    img.h = tmp->h;
+    img.texture = SDL_CreateTextureFromSurface(m->rend, tmp);
     SDL_FreeSurface(tmp);
-    return texture;
+    if (!img.texture) {
+        fprintf(stderr, "could not optimize text image\n(SDL error: %s)\n",
+                SDL_GetError());
+    }
+    return img;
+}
+
+void drawtext(struct magruka *m, int x, int y, struct textimg text) {
+    SDL_Rect src = {0, 0, text.w, text.h};
+    SDL_Rect dest = {x, y, text.w, text.h};
+    SDL_RenderCopy(m->rend, text.texture, &src, &dest);
 }
 
 /*
@@ -130,6 +150,17 @@ int load_assets(struct magruka *m) {
         m->img.letterx[i] = x;
     }
 
+    m->spells = malloc(2 * sizeof *m->spells);
+    strcpy(m->spells[0].name, "Missile");
+    strcpy(m->spells[0].gesture, "SD");
+    m->spells[0].damage = 1;
+    m->spells[1].name[0] = 0;
+
+    for (struct spell *sp = m->spells; sp->name[0]; ++sp) {
+        sp->nameimg = gentext(m, sp->name);
+        if (!sp->nameimg.texture) return 1;
+    }
+
     return 0;
 }
 
@@ -175,9 +206,6 @@ void magruka_main_loop(struct magruka *m) {
     SDL_Event e;
     int frame = 0;
 
-    int thingw, thingh;
-    SDL_Texture *thing = gentext(m, "C D P W      Dispel magic               P S D F          Charm personC S W W S    Summon elemental           P S F W          Summon ogreC w          Magic mirror               P W P F S S S D  Finger of deathD F F D D    Lightning bolt             P W P W W C      HasteD F P W      Cure heavy wounds          S D              MissileD F W        Cure light wounds          S F W            Summon goblinD P P        Amnesia                    S P F            Anti spellD S F        Confusion                  S P F P S D W    PermanencyD S F F F C  Disease                    S P P C          Time stopD W F F d    Blindness                  S S F P          Resist coldD W S S S P  Delayed effect             S W D            FearD W W F W C  Raise dead                 S W W C          Fire stormD W W F W D  Poison                     W D D C          Lightning boltF F F        Paralysis                  W F P            Cause light woundsF P S F W    Summon troll               W F P S F W      Summon giantF S S D D    Fireball                   W P F D          Cause heavy woundsP            Shield                     W P P            Counter spellp            Surrender                  W S S C          Ice stormP D W P      Remove enchantment         W W F P          Resist heatP P w s      Invisibility               W W P            Protection from evilP S D D      Charm monster              W W S            Counter spell", &thingw, &thingh);
-
     for (;;) {
         while (SDL_PollEvent(&e)) {
             switch (e.type) {
@@ -213,6 +241,11 @@ void magruka_main_loop(struct magruka *m) {
             top = 0;
         }
 
+        // draw spell list
+        for (struct spell *sp = m->spells; sp->name[0]; ++sp) {
+            drawtext(m, 100, 100, sp->nameimg);
+        }
+
         // draw temporary wizard
         int asdf = 8;
         ++frame;
@@ -221,9 +254,6 @@ void magruka_main_loop(struct magruka *m) {
 
         // draw temporary text
         write(m, 10, 10, "Player 1");
-        SDL_Rect src = (SDL_Rect){0, 0, thingw, thingh};
-        SDL_Rect dest = (SDL_Rect){200, 10, thingw, thingh};
-        SDL_RenderCopy(m->rend, thing, &src, &dest);
 
         // render everything
         SDL_RenderPresent(m->rend);

@@ -36,6 +36,19 @@
 #define P2(x,y)      ((SDL_Point){(x)*SCALE2,HEIGHT1+(y)*SCALE2})
 #define R2(x,y,w,h)  ((SDL_Rect){(x)*SCALE2,HEIGHT1+(y)*SCALE2,(w)*SCALE2,(h)*SCALE2})
 
+struct textimg {
+    SDL_Texture *texture;
+    int w;
+    int h;
+};
+
+struct spell {
+    char name[30];
+    struct textimg nameimg;
+    char gesture[9];
+    int damage;
+};
+
 struct magruka {
     SDL_Window *win;
     SDL_Surface *surf;
@@ -52,6 +65,7 @@ struct magruka {
         int letterh;
         int letterx[62];
     } img;
+    struct spell *spells;
 };
 
 struct magruka *magruka_init(void);
