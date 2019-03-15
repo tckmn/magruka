@@ -33,17 +33,33 @@ void anim(struct magruka *m, int x, int y, SDL_Rect clip, int offs) {
 }
 
 void write(struct magruka *m, int x, int y, char *text) {
-    SDL_Rect src = {m->img.letters.x, m->img.letters.y, 0, m->img.letterh * SCALE_FACTOR};
+    SDL_Rect src = {m->img.letters.x, m->img.letters.y, 0, m->img.letterh * SCALE2};
     SDL_Rect dest = {x, y, 0, src.h};
     for (; *text; ++text) {
         if (*text == ' ') {
-            dest.x += 2*SCALE_FACTOR + SCALE_FACTOR/2;
+            dest.x += 2*SCALE2 + SCALE2/2;
         } else {
             int ch = *text - 'A';
-            src.x = m->img.letters.x + m->img.letterx[ch] * SCALE_FACTOR;
-            src.w = dest.w = m->img.letterw[ch] * SCALE_FACTOR;
+            src.x = m->img.letters.x + m->img.letterx[ch] * SCALE2;
+            src.w = dest.w = m->img.letterw[ch] * SCALE2;
             SDL_RenderCopy(m->rend, m->img.spritesheet, &src, &dest);
-            dest.x += dest.w + SCALE_FACTOR/2;
+            dest.x += dest.w + SCALE2/2;
+        }
+    }
+}
+
+void writebig(struct magruka *m, int x, int y, char *text) {
+    SDL_Rect src = {m->img.bigletters.x, m->img.bigletters.y, 0, m->img.bigletterh * SCALE1};
+    SDL_Rect dest = {x, y, 0, src.h};
+    for (; *text; ++text) {
+        if (*text == ' ') {
+            dest.x += 2*SCALE1 + SCALE1/2;
+        } else {
+            int ch = *text - 'A';
+            src.x = m->img.bigletters.x + m->img.bigletterx[ch] * SCALE1;
+            src.w = dest.w = m->img.bigletterw[ch] * SCALE1;
+            SDL_RenderCopy(m->rend, m->img.spritesheet, &src, &dest);
+            dest.x += dest.w + SCALE1/2;
         }
     }
 }
@@ -73,36 +89,47 @@ int load_assets(struct magruka *m) {
     m->img.wall     = R(0,  37, 18, 16);
     m->img.floor    = R(18, 37, 18, 16);
     m->img.floortop = R(36, 37, 18, 16);
-    m->img.letters  = P(0, 53);
-    m->img.letterw[0] = 3;
-    m->img.letterw[1] = 3;
-    m->img.letterw[2] = 3;
-    m->img.letterw[3] = 3;
-    m->img.letterw[4] = 3;
-    m->img.letterw[5] = 3;
-    m->img.letterw[6] = 3;
-    m->img.letterw[7] = 3;
-    m->img.letterw[8] = 1;
-    m->img.letterw[9] = 3;
-    m->img.letterw[10] = 3;
-    m->img.letterw[11] = 3;
-    m->img.letterw[12] = 5;
-    m->img.letterw[13] = 4;
-    m->img.letterw[14] = 3;
-    m->img.letterw[15] = 3;
-    m->img.letterw[16] = 4;
-    m->img.letterw[17] = 3;
-    m->img.letterw[18] = 3;
-    m->img.letterw[19] = 3;
-    m->img.letterw[20] = 3;
-    m->img.letterw[21] = 3;
-    m->img.letterw[22] = 5;
-    m->img.letterw[23] = 3;
-    m->img.letterw[24] = 3;
-    m->img.letterw[25] = 3;
-    m->img.letterh = 5;
-    for (int x = 0, i = 0; i < 26; x += m->img.letterw[i], i++) {
+
+    m->img.letters    = P2(0, 0);
+    m->img.letterw[0]  = 4; m->img.letterw[1]  = 4; m->img.letterw[2]  = 4;
+    m->img.letterw[3]  = 4; m->img.letterw[4]  = 4; m->img.letterw[5]  = 4;
+    m->img.letterw[6]  = 4; m->img.letterw[7]  = 4; m->img.letterw[8]  = 3;
+    m->img.letterw[9]  = 4; m->img.letterw[10] = 4; m->img.letterw[11] = 4;
+    m->img.letterw[12] = 5; m->img.letterw[13] = 5; m->img.letterw[14] = 4;
+    m->img.letterw[15] = 4; m->img.letterw[16] = 4; m->img.letterw[17] = 4;
+    m->img.letterw[18] = 4; m->img.letterw[19] = 3; m->img.letterw[20] = 4;
+    m->img.letterw[21] = 5; m->img.letterw[22] = 5; m->img.letterw[23] = 5;
+    m->img.letterw[24] = 5; m->img.letterw[25] = 4; m->img.letterw[26] = 4;
+    m->img.letterw[27] = 3; m->img.letterw[28] = 3; m->img.letterw[29] = 3;
+    m->img.letterw[30] = 3; m->img.letterw[31] = 3; m->img.letterw[32] = 3;
+    m->img.letterw[33] = 3; m->img.letterw[34] = 1; m->img.letterw[35] = 3;
+    m->img.letterw[36] = 3; m->img.letterw[37] = 2; m->img.letterw[38] = 5;
+    m->img.letterw[39] = 3; m->img.letterw[40] = 3; m->img.letterw[41] = 3;
+    m->img.letterw[42] = 3; m->img.letterw[43] = 3; m->img.letterw[44] = 3;
+    m->img.letterw[45] = 3; m->img.letterw[46] = 4; m->img.letterw[47] = 3;
+    m->img.letterw[48] = 5; m->img.letterw[49] = 3; m->img.letterw[50] = 3;
+    m->img.letterw[51] = 3; m->img.letterw[52] = 4; m->img.letterw[53] = 3;
+    m->img.letterw[54] = 4; m->img.letterw[55] = 4; m->img.letterw[56] = 4;
+    m->img.letterw[57] = 4; m->img.letterw[58] = 4; m->img.letterw[59] = 4;
+    m->img.letterw[60] = 4; m->img.letterw[61] = 4;
+    m->img.letterh = 10;
+    for (int x = 0, i = 0; i < 62; x += m->img.letterw[i] + 1, i++) {
         m->img.letterx[i] = x;
+    }
+
+    m->img.bigletters    = P(0, 53);
+    m->img.bigletterw[0]  = 3; m->img.bigletterw[1]  = 3; m->img.bigletterw[2]  = 3;
+    m->img.bigletterw[3]  = 3; m->img.bigletterw[4]  = 3; m->img.bigletterw[5]  = 3;
+    m->img.bigletterw[6]  = 3; m->img.bigletterw[7]  = 3; m->img.bigletterw[8]  = 1;
+    m->img.bigletterw[9]  = 3; m->img.bigletterw[10] = 3; m->img.bigletterw[11] = 3;
+    m->img.bigletterw[12] = 5; m->img.bigletterw[13] = 4; m->img.bigletterw[14] = 3;
+    m->img.bigletterw[15] = 3; m->img.bigletterw[16] = 4; m->img.bigletterw[17] = 3;
+    m->img.bigletterw[18] = 3; m->img.bigletterw[19] = 3; m->img.bigletterw[20] = 3;
+    m->img.bigletterw[21] = 3; m->img.bigletterw[22] = 5; m->img.bigletterw[23] = 3;
+    m->img.bigletterw[24] = 3; m->img.bigletterw[25] = 3;
+    m->img.bigletterh = 5;
+    for (int x = 0, i = 0; i < 26; x += m->img.bigletterw[i], i++) {
+        m->img.bigletterx[i] = x;
     }
 
     return 0;
@@ -191,7 +218,8 @@ void magruka_main_loop(struct magruka *m) {
         anim(m, 100, FLOOR_POS - m->img.wiz.h, m->img.wiz, abs(3-frame/asdf));
 
         // draw temporary text
-        write(m, 100, 100, "PLAYER ONE");
+        write(m, 10, 10, "PLAYER ONE         F P S F W    SUMMON TROLL          W F P S F W      SUMMON GIANT");
+        writebig(m, 10, 30, "PLAYER ONE         F P S F W    SUMMON TROLL          W F P S F W      SUMMON GIANT");
 
         // render everything
         SDL_RenderPresent(m->rend);

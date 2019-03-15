@@ -22,14 +22,18 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 800
+#define SCREEN_WIDTH 960
+#define SCREEN_HEIGHT 540
 
 #define FLOOR_POS ((SCREEN_HEIGHT)*7/8)
 
-#define SCALE_FACTOR 4
-#define P(x,y)     ((SDL_Point){(x)*SCALE_FACTOR,(y)*SCALE_FACTOR})
-#define R(x,y,w,h) ((SDL_Rect){(x)*SCALE_FACTOR,(y)*SCALE_FACTOR,(w)*SCALE_FACTOR,(h)*SCALE_FACTOR})
+#define SCALE1 4
+#define SCALE2 2
+#define HEIGHT1 (185*SCALE1)
+#define P(x,y)      ((SDL_Point){(x)*SCALE1,(y)*SCALE1})
+#define R(x,y,w,h)  ((SDL_Rect){(x)*SCALE1,(y)*SCALE1,(w)*SCALE1,(h)*SCALE1})
+#define P2(x,y)     ((SDL_Point){(x)*SCALE2,HEIGHT1+(y)*SCALE2})
+#define R2(x,y,w,h) ((SDL_Rect){(x)*SCALE2,HEIGHT1+(y)*SCALE2,(w)*SCALE2,(h)*SCALE2})
 
 struct magruka {
     SDL_Window *win;
@@ -42,9 +46,13 @@ struct magruka {
         SDL_Rect floor;
         SDL_Rect floortop;
         SDL_Point letters;
-        int letterw[26];
+        int letterw[62];
         int letterh;
-        int letterx[26];
+        int letterx[62];
+        SDL_Point bigletters;
+        int bigletterw[26];
+        int bigletterh;
+        int bigletterx[26];
     } img;
 };
 

@@ -28,8 +28,10 @@ install: $(TARGET)
 	install -D $(TARGET) $(DESTDIR)$(PREFIX)/$(TARGET)
 	install -Dm644 $(MANPAGE) $(DESTDIR)$(PREFIX)/share/man/man1/$(MANPAGE)
 
-assets/img/spritesheet.png: assets/img/spritesheet-unscaled.png
-	convert assets/img/spritesheet-unscaled.png -sample 400% assets/img/spritesheet.png
+assets/img/spritesheet.png: assets/img/spritesheet2-unscaled.png assets/img/spritesheet4-unscaled.png
+	convert assets/img/spritesheet4-unscaled.png -sample 400% assets/img/spritesheet4.png
+	convert assets/img/spritesheet2-unscaled.png -sample 200% assets/img/spritesheet2.png
+	convert -background '#ff00ff' -append assets/img/spritesheet4.png assets/img/spritesheet2.png assets/img/spritesheet.png
 
 clean:
 	rm -rf bin
