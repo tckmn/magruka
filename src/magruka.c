@@ -3,6 +3,8 @@
 
 #include "magruka.h"
 
+#define SCALE_FACTOR 8
+
 void draw(struct magruka *m, int x, int y, SDL_Rect clip) {
     SDL_Rect dest = {x, y, clip.w, clip.h};
     SDL_RenderCopy(m->rend, m->img.spritesheet, &clip, &dest);
@@ -34,7 +36,7 @@ int load_assets(struct magruka *m) {
                 IMG_GetError());
         return 1;
     }
-    m->img.wizclip = (SDL_Rect){0, 0, 16, 37};
+    m->img.wizclip = (SDL_Rect){0*SCALE_FACTOR, 0*SCALE_FACTOR, 16*SCALE_FACTOR, 37*SCALE_FACTOR};
     return 0;
 }
 
@@ -123,10 +125,10 @@ void magruka_main_loop(struct magruka *m) {
         // start rendering stuff
         SDL_RenderClear(m->rend);
 
-        int asdf = 200;
+        int asdf = 150;
         ++frame;
-        frame %= 10*asdf;
-        anim(m, 100, 100, m->img.wizclip, frame/asdf > 3 ? 3 : frame/asdf);
+        frame %= 7*asdf;
+        anim(m, 100, 100, m->img.wizclip, abs(3-frame/asdf));
 
         // render everything
         SDL_RenderPresent(m->rend);
