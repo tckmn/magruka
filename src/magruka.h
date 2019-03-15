@@ -40,6 +40,7 @@ struct magruka {
     SDL_Window *win;
     SDL_Surface *surf;
     SDL_Renderer *rend;
+    TTF_Font *font;
     struct {
         SDL_Texture *spritesheet;
         SDL_Rect wiz;

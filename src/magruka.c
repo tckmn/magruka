@@ -53,11 +53,22 @@ void write(struct magruka *m, int x, int y, char *text) {
     }
 }
 
+SDL_Texture* gentext(struct magruka *m, char *text, int *w, int *h) {
+    // TODO error handling?
+    SDL_Surface *tmp = TTF_RenderText_Solid(m->font, text, (SDL_Color){0xff, 0xff, 0xff, 0xff});
+    *w = tmp->w;
+    *h = tmp->h;
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(m->rend, tmp);
+    SDL_FreeSurface(tmp);
+    return texture;
+}
+
 /*
  * load all the data in the assets directory into memory
  */
 int load_assets(struct magruka *m) {
     SDL_Surface *tmp;
+
     tmp = IMG_Load("assets/img/spritesheet.png");
     if (tmp) {
         SDL_SetColorKey(tmp, SDL_TRUE, SDL_MapRGB(tmp->format, 0xff, 0x00, 0xff));
@@ -71,6 +82,18 @@ int load_assets(struct magruka *m) {
     } else {
         fprintf(stderr, "could not load spritesheet image\n(SDL/IMG error: %s)\n",
                 IMG_GetError());
+        return 1;
+    }
+
+    if (TTF_Init() == -1) {
+        printf("could not initialize TTF library\n(SDL/TTF error: %s)\n",
+                TTF_GetError());
+        return 1;
+    }
+    m->font = TTF_OpenFont("assets/font/November.ttf", 16);
+    if (!m->font) {
+        fprintf(stderr, "could not open font\n(SDL/TTF error: %s)\n",
+                TTF_GetError());
         return 1;
     }
 
@@ -151,6 +174,10 @@ struct magruka *magruka_init() {
 void magruka_main_loop(struct magruka *m) {
     SDL_Event e;
     int frame = 0;
+
+    int thingw, thingh;
+    SDL_Texture *thing = gentext(m, "C D P W      Dispel magic               P S D F          Charm personC S W W S    Summon elemental           P S F W          Summon ogreC w          Magic mirror               P W P F S S S D  Finger of deathD F F D D    Lightning bolt             P W P W W C      HasteD F P W      Cure heavy wounds          S D              MissileD F W        Cure light wounds          S F W            Summon goblinD P P        Amnesia                    S P F            Anti spellD S F        Confusion                  S P F P S D W    PermanencyD S F F F C  Disease                    S P P C          Time stopD W F F d    Blindness                  S S F P          Resist coldD W S S S P  Delayed effect             S W D            FearD W W F W C  Raise dead                 S W W C          Fire stormD W W F W D  Poison                     W D D C          Lightning boltF F F        Paralysis                  W F P            Cause light woundsF P S F W    Summon troll               W F P S F W      Summon giantF S S D D    Fireball                   W P F D          Cause heavy woundsP            Shield                     W P P            Counter spellp            Surrender                  W S S C          Ice stormP D W P      Remove enchantment         W W F P          Resist heatP P w s      Invisibility               W W P            Protection from evilP S D D      Charm monster              W W S            Counter spell", &thingw, &thingh);
+
     for (;;) {
         while (SDL_PollEvent(&e)) {
             switch (e.type) {
@@ -194,6 +221,9 @@ void magruka_main_loop(struct magruka *m) {
 
         // draw temporary text
         write(m, 10, 10, "Player 1");
+        SDL_Rect src = (SDL_Rect){0, 0, thingw, thingh};
+        SDL_Rect dest = (SDL_Rect){200, 10, thingw, thingh};
+        SDL_RenderCopy(m->rend, thing, &src, &dest);
 
         // render everything
         SDL_RenderPresent(m->rend);
