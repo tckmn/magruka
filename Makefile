@@ -5,7 +5,7 @@ PREFIX ?= /usr/local
 LIBS = -lm -lSDL2 -lSDL2_image
 .PHONY: all debug release install clean
 
-all: $(TARGET)
+all: $(TARGET) assets/img/spritesheet.png
 
 bin/%.o: src/%.c $(wildcard src/*.h)
 	@mkdir -p bin
@@ -27,6 +27,9 @@ release: $(TARGET)
 install: $(TARGET)
 	install -D $(TARGET) $(DESTDIR)$(PREFIX)/$(TARGET)
 	install -Dm644 $(MANPAGE) $(DESTDIR)$(PREFIX)/share/man/man1/$(MANPAGE)
+
+assets/img/spritesheet.png: assets/img/spritesheet-unscaled.png
+	convert assets/img/spritesheet-unscaled.png -sample 400% assets/img/spritesheet.png
 
 clean:
 	rm -rf bin

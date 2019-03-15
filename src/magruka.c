@@ -3,7 +3,7 @@
 
 #include "magruka.h"
 
-#define SCALE_FACTOR 8
+#define SCALE_FACTOR 4
 
 void draw(struct magruka *m, int x, int y, SDL_Rect clip) {
     SDL_Rect dest = {x, y, clip.w, clip.h};
@@ -68,9 +68,9 @@ struct magruka *magruka_init() {
     m->surf = SDL_GetWindowSurface(m->win);
 
     // create renderer
-    m->rend = SDL_CreateRenderer(m->win, -1, SDL_RENDERER_ACCELERATED);
+    m->rend = SDL_CreateRenderer(m->win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!m->rend) FAIL("could not create hardware renderer");
-    SDL_SetRenderDrawColor(m->rend, 0x00, 0x00, 0x00, 0xff);
+    SDL_SetRenderDrawColor(m->rend, 0x10, 0x10, 0x10, 0xff);
 
     // load assets
     if (load_assets(m)) FAIL("failed to load assets");
@@ -100,7 +100,7 @@ void magruka_main_loop(struct magruka *m) {
         // start rendering stuff
         SDL_RenderClear(m->rend);
 
-        int asdf = 150;
+        int asdf = 8;
         ++frame;
         frame %= 7*asdf;
         anim(m, 100, 100, m->img.wizclip, abs(3-frame/asdf));
