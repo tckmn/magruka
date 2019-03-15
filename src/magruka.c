@@ -3,9 +3,15 @@
 
 #include "magruka.h"
 
-void draw(struct magruka *m, int x, int y, SDL_Rect *clip) {
-    SDL_Rect dest = {x, y, clip->w, clip->h};
-    SDL_RenderCopy(m->rend, m->img.spritesheet, clip, &dest);
+void draw(struct magruka *m, int x, int y, SDL_Rect clip) {
+    SDL_Rect dest = {x, y, clip.w, clip.h};
+    SDL_RenderCopy(m->rend, m->img.spritesheet, &clip, &dest);
+}
+
+void anim(struct magruka *m, int x, int y, SDL_Rect clip, int offs) {
+    SDL_Rect src = {clip.x + offs*clip.w, clip.y, clip.w, clip.h};
+    SDL_Rect dest = {x, y, clip.w, clip.h};
+    SDL_RenderCopy(m->rend, m->img.spritesheet, &src, &dest);
 }
 
 /*
@@ -91,6 +97,7 @@ struct magruka *magruka_init() {
 
 void magruka_main_loop(struct magruka *m) {
     SDL_Event e;
+    int frame = 0;
     for (;;) {
         while (SDL_PollEvent(&e)) {
             switch (e.type) {
@@ -116,7 +123,10 @@ void magruka_main_loop(struct magruka *m) {
         // start rendering stuff
         SDL_RenderClear(m->rend);
 
-        draw(m, 0, 0, &m->img.wizclip);
+        int asdf = 200;
+        ++frame;
+        frame %= 10*asdf;
+        anim(m, 100, 100, m->img.wizclip, frame/asdf > 3 ? 3 : frame/asdf);
 
         // render everything
         SDL_RenderPresent(m->rend);
