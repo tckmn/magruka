@@ -33,8 +33,8 @@
 #define HEIGHT1 (185*SCALE1)
 #define P1(x,y)      ((SDL_Point){(x)*SCALE1,(y)*SCALE1})
 #define R1(x,y,w,h)  ((SDL_Rect){(x)*SCALE1,(y)*SCALE1,(w)*SCALE1,(h)*SCALE1})
-#define P2(x,y)     ((SDL_Point){(x)*SCALE2,HEIGHT1+(y)*SCALE2})
-#define R2(x,y,w,h) ((SDL_Rect){(x)*SCALE2,HEIGHT1+(y)*SCALE2,(w)*SCALE2,(h)*SCALE2})
+#define P2(x,y)      ((SDL_Point){(x)*SCALE2,HEIGHT1+(y)*SCALE2})
+#define R2(x,y,w,h)  ((SDL_Rect){(x)*SCALE2,HEIGHT1+(y)*SCALE2,(w)*SCALE2,(h)*SCALE2})
 
 struct magruka {
     SDL_Window *win;
@@ -50,10 +50,6 @@ struct magruka {
         int letterw[62];
         int letterh;
         int letterx[62];
-        SDL_Point bigletters;
-        int bigletterw[26];
-        int bigletterh;
-        int bigletterx[26];
     } img;
 };
 
