@@ -76,6 +76,7 @@ struct magruka {
         SDL_Rect wiz;
         SDL_Rect wall, floor, floortop;
         SDL_Rect gesture, gesturefinal;
+        SDL_Rect healthcirc, healthbar, healthend, healthcapr, healthcapl;
         SDL_Rect key, keytop, keybot, keyall, keyboth;
         SDL_Point letters;
         int letterw[62];

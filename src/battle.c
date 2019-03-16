@@ -19,6 +19,28 @@
 #include "battle.h"
 #include "util.h"
 
+void drawhpbar(struct magruka *m, int x, int y, int flip, struct creature c, double prop) {
+    int circx = flip ? x - m->img.healthcirc.w : x,
+        hbarx = flip ? circx - m->img.healthbar.w + SCALE1 : circx + m->img.healthcirc.w - SCALE1,
+        capx = flip ? hbarx - m->img.healthcapl.w : hbarx + m->img.healthbar.w,
+        endx = flip ? capx + m->img.healthend.w : capx,
+        barw = prop * (m->img.healthbar.w + SCALE1),
+        barx = flip ? circx + SCALE1 - barw : hbarx;
+
+    draw(m, endx, y, m->img.healthend);
+    draw(m, hbarx, y, m->img.healthbar);
+
+    // NOTE: this is hardcoded to the spritesheet
+    SDL_Rect bar = {barx, y + 4*SCALE1, barw, 7*SCALE1};
+    SDL_SetRenderDrawColor(m->rend, 0xff, 0x00, 0x00, 0xff);
+    SDL_RenderFillRect(m->rend, &bar);
+
+    draw(m, circx, y, m->img.healthcirc);
+    draw(m, capx, y, flip ? m->img.healthcapl : m->img.healthcapr);
+    drawtext(m, circx + m->img.healthcirc.w/2 - c.hpimg.w - 1, y + m->img.healthcirc.h/2 - c.hpimg.h - 1, c.hpimg);
+    drawtext(m, circx + m->img.healthcirc.w/2 + 1, y + m->img.healthcirc.h/2 + 1, c.maxhpimg);
+}
+
 struct battlestate *battle_init(struct magruka *m) {
     struct battlestate *b = malloc(sizeof *b);
     b->lh = b->rh = -1;
@@ -93,9 +115,6 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
         }
     }
 
-    // start rendering stuff
-    SDL_RenderClear(m->rend);
-
     // draw background tiles
     for (int x = 0; x < SCREEN_WIDTH; x += m->img.wall.w) {
         for (int y = 0; y < SCREEN_HEIGHT; y += m->img.wall.h) {
@@ -134,6 +153,10 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
     animex(m, SCREEN_WIDTH - 100 - m->img.wiz.w, FLOOR_POS - m->img.wiz.h, m->img.wiz, 0,
             0, 0, SDL_FLIP_HORIZONTAL);
 
+    // draw health bars
+    drawhpbar(m, 5, 5, 0, b->p1, (SDL_GetTicks()%1000)/1000.0);
+    drawhpbar(m, SCREEN_WIDTH - 5, 5, 1, b->p2, (SDL_GetTicks()%1000)/1000.0);
+
     // draw held gestures (TODO: positioning)
     if (b->lh != -1) anim(m, SCREEN_WIDTH/2 - m->spellnamew - m->img.gesture.w - 20, 200, b->lhf ? m->img.gesture : m->img.gesturefinal, b->lh);
     if (b->rh != -1) anim(m, SCREEN_WIDTH/2 + m->spellnamew + 20, 200, b->rhf ? m->img.gesture : m->img.gesturefinal, b->rh);
@@ -144,7 +167,7 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
     }
 
     /* // draw temporary text */
-    write(m, 10, 10, "Player 1");
+    /* write(m, 10, 10, "Player 1"); */
 
     // render everything
     SDL_RenderPresent(m->rend);

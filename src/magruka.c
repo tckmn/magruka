@@ -58,17 +58,22 @@ int load_assets(struct magruka *m) {
         return 1;
     }
 
-    m->img.wiz          = R1(0,  0,  16, 37);
-    m->img.wall         = R1(0,  37, 18, 16);
-    m->img.floor        = R1(18, 37, 18, 16);
-    m->img.floortop     = R1(36, 37, 18, 16);
-    m->img.gesture      = R1(0,  63, 28, 32);
-    m->img.gesturefinal = R1(0,  95, 28, 32);
-    m->img.key          = R2(0,  0,  9,  9);
-    m->img.keytop       = R2(0,  0,  9,  5);
-    m->img.keybot       = R2(0,  4,  9,  5);
-    m->img.keyall       = R2(0,  9,  9,  9);
-    m->img.keyboth      = R2(0,  18, 9,  9);
+    m->img.wiz          = R1(0,  0,   16, 37);
+    m->img.wall         = R1(0,  37,  18, 16);
+    m->img.floor        = R1(18, 37,  18, 16);
+    m->img.floortop     = R1(36, 37,  18, 16);
+    m->img.gesture      = R1(0,  63,  28, 32);
+    m->img.gesturefinal = R1(0,  95,  28, 32);
+    m->img.healthcirc   = R1(0,  127, 15, 15);
+    m->img.healthbar    = R1(15, 127, 40, 15);
+    m->img.healthend    = R1(55, 127, 1,  15);
+    m->img.healthcapr   = R1(56, 127, 2,  15);
+    m->img.healthcapl   = R1(57, 127, 2,  15);
+    m->img.key          = R2(0,  0,   9,  9);
+    m->img.keytop       = R2(0,  0,   9,  5);
+    m->img.keybot       = R2(0,  4,   9,  5);
+    m->img.keyall       = R2(0,  9,   9,  9);
+    m->img.keyboth      = R2(0,  18,  9,  9);
 
     m->img.letters     = P1(0, 53);
     m->img.letterw[0]  = 4; m->img.letterw[1]  = 4; m->img.letterw[2]  = 4;
