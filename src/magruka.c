@@ -117,10 +117,12 @@ int load_assets(struct magruka *m) {
         return 1;
     }
 
-    m->img.wiz      = R1(0,  0,  16, 37);
-    m->img.wall     = R1(0,  37, 18, 16);
-    m->img.floor    = R1(18, 37, 18, 16);
-    m->img.floortop = R1(36, 37, 18, 16);
+    m->img.wiz          = R1(0,  0,  16, 37);
+    m->img.wall         = R1(0,  37, 18, 16);
+    m->img.floor        = R1(18, 37, 18, 16);
+    m->img.floortop     = R1(36, 37, 18, 16);
+    m->img.gesture      = R1(0,  63, 28, 32);
+    m->img.gesturefinal = R1(0,  95, 28, 32);
 
     m->img.letters     = P1(0, 53);
     m->img.letterw[0]  = 4; m->img.letterw[1]  = 4; m->img.letterw[2]  = 4;
@@ -247,10 +249,12 @@ void magruka_main_loop(struct magruka *m) {
         }
 
         // draw temporary wizard
-        int asdf = 8;
+        int asdf = 20;
         ++frame;
         frame %= 7*asdf;
         anim(m, 100, FLOOR_POS - m->img.wiz.h, m->img.wiz, abs(3-frame/asdf));
+        anim(m, 300, 300, m->img.gesture, frame/asdf);
+        anim(m, 200, 200, m->img.gesturefinal, frame/asdf);
 
         // draw temporary text
         write(m, 10, 10, "Player 1");

@@ -60,6 +60,8 @@ struct magruka {
         SDL_Rect wall;
         SDL_Rect floor;
         SDL_Rect floortop;
+        SDL_Rect gesture;
+        SDL_Rect gesturefinal;
         SDL_Point letters;
         int letterw[62];
         int letterh;
