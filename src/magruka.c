@@ -208,6 +208,7 @@ void magruka_main_loop(struct magruka *m) {
     SDL_Event e;
     int frame = 0;
 
+    int lh = -1, rh = -1;
     for (;;) {
         while (SDL_PollEvent(&e)) {
             switch (e.type) {
@@ -215,7 +216,26 @@ void magruka_main_loop(struct magruka *m) {
                 return;
             case SDL_KEYDOWN:
                 switch (e.key.keysym.sym) {
-                case 'q': return;
+                case SDLK_ESCAPE: return;
+
+                case 'q': lh = GESTURE_STAB; break;
+                case 'w': lh = GESTURE_W;    break;
+                case 'e': lh = GESTURE_C;    break;
+                case 'r': lh = GESTURE_P;    break;
+                case 'a': lh = GESTURE_NONE; break;
+                case 's': lh = GESTURE_S;    break;
+                case 'd': lh = GESTURE_D;    break;
+                case 'f': lh = GESTURE_F;    break;
+
+                case 'p': rh = GESTURE_STAB; break;
+                case 'o': rh = GESTURE_W;    break;
+                case 'i': rh = GESTURE_C;    break;
+                case 'u': rh = GESTURE_P;    break;
+                case ';': rh = GESTURE_NONE; break;
+                case 'l': rh = GESTURE_S;    break;
+                case 'k': rh = GESTURE_D;    break;
+                case 'j': rh = GESTURE_F;    break;
+
                 }
                 break;
             default:
@@ -248,13 +268,12 @@ void magruka_main_loop(struct magruka *m) {
             drawtext(m, 100, 100, sp->nameimg);
         }
 
-        // draw temporary wizard
-        int asdf = 20;
-        ++frame;
-        frame %= 7*asdf;
-        anim(m, 100, FLOOR_POS - m->img.wiz.h, m->img.wiz, abs(3-frame/asdf));
-        anim(m, 300, 300, m->img.gesture, frame/asdf);
-        anim(m, 200, 200, m->img.gesturefinal, frame/asdf);
+        // draw wizard
+        anim(m, 100, FLOOR_POS - m->img.wiz.h, m->img.wiz, 0);
+
+        // draw held gestures
+        if (lh != -1) anim(m, 200, 200, m->img.gesture, lh);
+        if (rh != -1) anim(m, 400, 200, m->img.gesture, rh);
 
         // draw temporary text
         write(m, 10, 10, "Player 1");

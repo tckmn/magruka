@@ -36,6 +36,15 @@
 #define P2(x,y)      ((SDL_Point){(x)*SCALE2,HEIGHT1+(y)*SCALE2})
 #define R2(x,y,w,h)  ((SDL_Rect){(x)*SCALE2,HEIGHT1+(y)*SCALE2,(w)*SCALE2,(h)*SCALE2})
 
+#define GESTURE_C    0
+#define GESTURE_D    1
+#define GESTURE_F    2
+#define GESTURE_P    3
+#define GESTURE_S    4
+#define GESTURE_W    5
+#define GESTURE_STAB 6
+#define GESTURE_NONE 7
+
 struct textimg {
     SDL_Texture *texture;
     int w;
