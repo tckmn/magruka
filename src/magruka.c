@@ -208,39 +208,65 @@ void magruka_main_loop(struct magruka *m) {
     SDL_Event e;
     int frame = 0;
 
-    int lh = -1, rh = -1;
+    int lh = -1, rh = -1, lhf = 0, rhf = 0;
     for (;;) {
         while (SDL_PollEvent(&e)) {
             switch (e.type) {
+
             case SDL_QUIT:
                 return;
+
             case SDL_KEYDOWN:
                 switch (e.key.keysym.sym) {
                 case SDLK_ESCAPE: return;
 
-                case 'q': lh = GESTURE_STAB; break;
-                case 'w': lh = GESTURE_W;    break;
-                case 'e': lh = GESTURE_C;    break;
-                case 'r': lh = GESTURE_P;    break;
-                case 'a': lh = GESTURE_NONE; break;
-                case 's': lh = GESTURE_S;    break;
-                case 'd': lh = GESTURE_D;    break;
-                case 'f': lh = GESTURE_F;    break;
+                case 'q': lhf |= 1 << GESTURE_STAB; lh = GESTURE_STAB; break;
+                case 'w': lhf |= 1 << GESTURE_W;    lh = GESTURE_W;    break;
+                case 'e': lhf |= 1 << GESTURE_C;    lh = GESTURE_C;    break;
+                case 'r': lhf |= 1 << GESTURE_P;    lh = GESTURE_P;    break;
+                case 'a': lhf |= 1 << GESTURE_NONE; lh = GESTURE_NONE; break;
+                case 's': lhf |= 1 << GESTURE_S;    lh = GESTURE_S;    break;
+                case 'd': lhf |= 1 << GESTURE_D;    lh = GESTURE_D;    break;
+                case 'f': lhf |= 1 << GESTURE_F;    lh = GESTURE_F;    break;
 
-                case 'p': rh = GESTURE_STAB; break;
-                case 'o': rh = GESTURE_W;    break;
-                case 'i': rh = GESTURE_C;    break;
-                case 'u': rh = GESTURE_P;    break;
-                case ';': rh = GESTURE_NONE; break;
-                case 'l': rh = GESTURE_S;    break;
-                case 'k': rh = GESTURE_D;    break;
-                case 'j': rh = GESTURE_F;    break;
+                case 'p': rhf |= 1 << GESTURE_STAB; rh = GESTURE_STAB; break;
+                case 'o': rhf |= 1 << GESTURE_W;    rh = GESTURE_W;    break;
+                case 'i': rhf |= 1 << GESTURE_C;    rh = GESTURE_C;    break;
+                case 'u': rhf |= 1 << GESTURE_P;    rh = GESTURE_P;    break;
+                case ';': rhf |= 1 << GESTURE_NONE; rh = GESTURE_NONE; break;
+                case 'l': rhf |= 1 << GESTURE_S;    rh = GESTURE_S;    break;
+                case 'k': rhf |= 1 << GESTURE_D;    rh = GESTURE_D;    break;
+                case 'j': rhf |= 1 << GESTURE_F;    rh = GESTURE_F;    break;
+
+                case ' ': lhf = 0; rhf = 0; lh = -1; rh = -1; break;
 
                 }
                 break;
-            default:
-                // unknown event, ignore it
+
+            case SDL_KEYUP:
+                switch (e.key.keysym.sym) {
+
+                case 'q': lhf &= ~(1 << GESTURE_STAB); break;
+                case 'w': lhf &= ~(1 << GESTURE_W);    break;
+                case 'e': lhf &= ~(1 << GESTURE_C);    break;
+                case 'r': lhf &= ~(1 << GESTURE_P);    break;
+                case 'a': lhf &= ~(1 << GESTURE_NONE); break;
+                case 's': lhf &= ~(1 << GESTURE_S);    break;
+                case 'd': lhf &= ~(1 << GESTURE_D);    break;
+                case 'f': lhf &= ~(1 << GESTURE_F);    break;
+
+                case 'p': rhf &= ~(1 << GESTURE_STAB); break;
+                case 'o': rhf &= ~(1 << GESTURE_W);    break;
+                case 'i': rhf &= ~(1 << GESTURE_C);    break;
+                case 'u': rhf &= ~(1 << GESTURE_P);    break;
+                case ';': rhf &= ~(1 << GESTURE_NONE); break;
+                case 'l': rhf &= ~(1 << GESTURE_S);    break;
+                case 'k': rhf &= ~(1 << GESTURE_D);    break;
+                case 'j': rhf &= ~(1 << GESTURE_F);    break;
+
+                }
                 break;
+
             }
         }
 
@@ -272,8 +298,13 @@ void magruka_main_loop(struct magruka *m) {
         anim(m, 100, FLOOR_POS - m->img.wiz.h, m->img.wiz, 0);
 
         // draw held gestures
-        if (lh != -1) anim(m, 200, 200, m->img.gesture, lh);
-        if (rh != -1) anim(m, 400, 200, m->img.gesture, rh);
+        if (lh != -1) anim(m, 200, 200, lhf ? m->img.gesture : m->img.gesturefinal, lh);
+        if (rh != -1) anim(m, 400, 200, rhf ? m->img.gesture : m->img.gesturefinal, rh);
+
+        // check for finalized turn
+        if (lh != -1 && rh != -1 && !lhf && !rhf) {
+            // TODO
+        }
 
         // draw temporary text
         write(m, 10, 10, "Player 1");
