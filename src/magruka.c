@@ -98,7 +98,7 @@ int load_assets(struct magruka *m) {
     //  * gestures followed by NUL
     //  * single byte with damage+128 (e.g. 0x80 = 0 damage)
     //  * newline (for convenience in editing the file)
-    int ns = 0;
+    m->nspells = 0;
     m->spells = malloc(sizeof *m->spells);
     FILE *f = fopen("assets/data/spells.dat", "r");
     if (!f) {
@@ -111,22 +111,22 @@ int load_assets(struct magruka *m) {
         pos = 0;
         while (ch = getc(f)) {
             if (ch == EOF) goto done;
-            m->spells[ns].name[pos++] = ch;
+            m->spells[m->nspells].name[pos++] = ch;
         }
-        m->spells[ns].name[pos] = 0;
+        m->spells[m->nspells].name[pos] = 0;
         // read gestures
         pos = 0;
-        while (ch = getc(f)) m->spells[ns].gesture[pos++] = ch;
-        m->spells[ns].gesture[pos] = 0;
+        while (ch = getc(f)) m->spells[m->nspells].gesture[pos++] = ch;
+        m->spells[m->nspells].gesture[pos] = 0;
         // read damage
-        m->spells[ns].damage = getc(f) - 0x80;
+        m->spells[m->nspells].damage = getc(f) - 0x80;
         // discard newline
         if (getc(f) != '\n') {
             fprintf(stderr, "corrupted spell data file\n");
             return 1;
         }
         // append a new spell
-        m->spells = realloc(m->spells, (++ns + 1) * sizeof *m->spells);
+        m->spells = realloc(m->spells, (++m->nspells + 1) * sizeof *m->spells);
     }
 done:
 

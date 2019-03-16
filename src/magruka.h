@@ -26,6 +26,8 @@
 #define SCREEN_WIDTH 960
 #define SCREEN_HEIGHT 540
 
+#define SPELLS_PER_PAGE 21
+
 #define FLOOR_POS ((SCREEN_HEIGHT)*7/8)
 
 #define SCALE1 4
@@ -81,6 +83,7 @@ struct magruka {
         int letterx[62];
     } img;
     struct spell *spells;
+    int nspells;
     int spellnamew;
     int spellnameh;
 };

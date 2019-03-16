@@ -23,6 +23,7 @@
 
 struct battlestate {
     int lh, rh, lhf, rhf;
+    int page;
 };
 
 struct battlestate *battle_init(void);

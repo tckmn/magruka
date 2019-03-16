@@ -23,6 +23,7 @@ struct battlestate *battle_init(void) {
     struct battlestate *b = malloc(sizeof *b);
     b->lh = b->rh = -1;
     b->lhf = b->rhf = 0;
+    b->page = 0;
     return b;
 }
 
@@ -54,6 +55,9 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
             case 'l': b->rhf |= 1 << GESTURE_S;    b->rh = GESTURE_S;    break;
             case 'k': b->rhf |= 1 << GESTURE_D;    b->rh = GESTURE_D;    break;
             case 'j': b->rhf |= 1 << GESTURE_F;    b->rh = GESTURE_F;    break;
+
+            case '.': if (b->page < m->nspells / SPELLS_PER_PAGE - 1) ++b->page; break;
+            case ',': if (b->page > 0) --b->page; break;
 
             case ' ': b->lhf = b->rhf = 0; b->lh = b->rh = -1; break;
 
@@ -107,14 +111,12 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
     }
 
     // draw spell list
-    int xpos = SCREEN_WIDTH/2 - m->spellnamew, ypos = 10;
-    for (struct spell *sp = m->spells; sp->name[0]; ++sp) {
-        drawtext(m, xpos, ypos, sp->nameimg);
+    int ypos = 10;
+    struct spell *sp = m->spells;
+    for (int i = 0; i < b->page * SPELLS_PER_PAGE; ++i) ++sp;
+    for (int i = 0; sp->name[0] && i < SPELLS_PER_PAGE; ++sp, ++i) {
+        drawtext(m, SCREEN_WIDTH/2 - m->spellnamew, ypos, sp->nameimg);
         ypos += m->spellnameh + 4;
-        if (ypos + m->spellnameh > SCREEN_HEIGHT-100) {
-            xpos += m->spellnamew;
-            ypos = 10;
-        }
     }
 
     // draw wizard
