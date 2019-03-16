@@ -16,20 +16,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __BATTLE_H__
-#define __BATTLE_H__
-
-#include "magruka.h"
 #include "creature.h"
+#include "util.h"
 
-struct battlestate {
-    int lh, rh, lhf, rhf;
-    int page;
-    struct creature p1, p2;
-};
+void creature_init(struct magruka *m, struct creature *c, int hp) {
+    c->hp = c->maxhp = hp;
+    char s[12];
+    snprintf(s, 12, "%d", hp);
+    c->hpimg = gentext(m, s);     // this gets destroyed separately
+    c->maxhpimg = gentext(m, s);  // so this needs to be different
+}
 
-struct battlestate *battle_init(struct magruka*);
-int battle_main_loop(struct magruka*, struct battlestate*);
-void battle_destroy(struct battlestate*);
+void creature_dmg(struct magruka *m, struct creature *c, int dmg) {
+    c->hp -= dmg;
+    if (c->hp < 0) c->hp = 0;
+    char s[12];
+    snprintf(s, 12, "%d", c->hp);
+    SDL_DestroyTexture(c->hpimg.texture);
+    c->hpimg = gentext(m, s);
+}
 
-#endif
+void creature_destroy(struct creature *c) {
+    SDL_DestroyTexture(c->hpimg.texture);
+    SDL_DestroyTexture(c->maxhpimg.texture);
+}

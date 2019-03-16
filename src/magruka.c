@@ -64,6 +64,11 @@ int load_assets(struct magruka *m) {
     m->img.floortop     = R1(36, 37, 18, 16);
     m->img.gesture      = R1(0,  63, 28, 32);
     m->img.gesturefinal = R1(0,  95, 28, 32);
+    m->img.key          = R2(0,  0,  9,  9);
+    m->img.keytop       = R2(0,  0,  9,  5);
+    m->img.keybot       = R2(0,  4,  9,  5);
+    m->img.keyall       = R2(0,  9,  9,  9);
+    m->img.keyboth      = R2(0,  18, 9,  9);
 
     m->img.letters     = P1(0, 53);
     m->img.letterw[0]  = 4; m->img.letterw[1]  = 4; m->img.letterw[2]  = 4;
@@ -116,8 +121,8 @@ int load_assets(struct magruka *m) {
         m->spells[m->nspells].name[pos] = 0;
         // read gestures
         pos = 0;
-        while (ch = getc(f)) m->spells[m->nspells].gesture[pos++] = ch;
-        m->spells[m->nspells].gesture[pos] = 0;
+        while (ch = getc(f)) m->spells[m->nspells].gesture[pos++] = g2n(ch);
+        m->spells[m->nspells].gesture[pos] = SPELL_END;
         // read damage
         m->spells[m->nspells].damage = getc(f) - 0x80;
         // discard newline
@@ -182,7 +187,7 @@ struct magruka *magruka_init() {
 void magruka_main_loop(struct magruka *m) {
     // start in battle state
     m->state = STATE_BATTLE;
-    struct battlestate *b = battle_init();
+    struct battlestate *b = battle_init(m);
 
     int ret;
     for (;;) {

@@ -16,20 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __BATTLE_H__
-#define __BATTLE_H__
+#ifndef __CREATURE_H__
+#define __CREATURE_H__
 
 #include "magruka.h"
-#include "creature.h"
 
-struct battlestate {
-    int lh, rh, lhf, rhf;
-    int page;
-    struct creature p1, p2;
+struct creature {
+    int hp, maxhp;
+    struct textimg hpimg, maxhpimg;
 };
 
-struct battlestate *battle_init(struct magruka*);
-int battle_main_loop(struct magruka*, struct battlestate*);
-void battle_destroy(struct battlestate*);
+void creature_init(struct magruka*, struct creature*, int);
+void creature_dmg(struct magruka*, struct creature*, int);
+void creature_destroy(struct creature*);
 
 #endif

@@ -22,9 +22,12 @@
 #include "magruka.h"
 
 void draw(struct magruka*, int, int, SDL_Rect);
+void drawex(struct magruka*, int, int, SDL_Rect, double, SDL_Point*, SDL_RendererFlip);
 void anim(struct magruka*, int, int, SDL_Rect, int);
+void animex(struct magruka*, int, int, SDL_Rect, int, double, SDL_Point*, SDL_RendererFlip);
 void write(struct magruka*, int, int, char*);
 struct textimg gentext(struct magruka*, char*);
 void drawtext(struct magruka*, int, int, struct textimg);
+int g2n(char);
 
 #endif

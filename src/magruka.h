@@ -26,6 +26,7 @@
 #define SCREEN_WIDTH 960
 #define SCREEN_HEIGHT 540
 
+#define SPELL_LIST_PAD 5
 #define SPELLS_PER_PAGE 21
 
 #define FLOOR_POS ((SCREEN_HEIGHT)*7/8)
@@ -46,6 +47,7 @@
 #define GESTURE_W    5
 #define GESTURE_STAB 6
 #define GESTURE_NONE 7
+#define SPELL_END    8
 
 #define STATE_BATTLE 1
 
@@ -58,7 +60,7 @@ struct textimg {
 struct spell {
     char name[30];
     struct textimg nameimg;
-    char gesture[9];
+    int gesture[9];
     int damage;
 };
 
@@ -72,11 +74,9 @@ struct magruka {
     struct {
         SDL_Texture *spritesheet;
         SDL_Rect wiz;
-        SDL_Rect wall;
-        SDL_Rect floor;
-        SDL_Rect floortop;
-        SDL_Rect gesture;
-        SDL_Rect gesturefinal;
+        SDL_Rect wall, floor, floortop;
+        SDL_Rect gesture, gesturefinal;
+        SDL_Rect key, keytop, keybot, keyall, keyboth;
         SDL_Point letters;
         int letterw[62];
         int letterh;

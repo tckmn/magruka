@@ -19,11 +19,13 @@
 #include "battle.h"
 #include "util.h"
 
-struct battlestate *battle_init(void) {
+struct battlestate *battle_init(struct magruka *m) {
     struct battlestate *b = malloc(sizeof *b);
     b->lh = b->rh = -1;
     b->lhf = b->rhf = 0;
     b->page = 0;
+    creature_init(m, &b->p1, 15);
+    creature_init(m, &b->p2, 15);
     return b;
 }
 
@@ -115,14 +117,24 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
     struct spell *sp = m->spells;
     for (int i = 0; i < b->page * SPELLS_PER_PAGE; ++i) ++sp;
     for (int i = 0; sp->name[0] && i < SPELLS_PER_PAGE; ++sp, ++i) {
-        drawtext(m, SCREEN_WIDTH/2 - m->spellnamew, ypos, sp->nameimg);
+        // draw spell name
+        drawtext(m, SCREEN_WIDTH/2 - m->spellnamew - SPELL_LIST_PAD, ypos, sp->nameimg);
+        // draw gesture list
+        int xpos = SCREEN_WIDTH/2 + SPELL_LIST_PAD;
+        for (int *g = sp->gesture; *g != SPELL_END; ++g) {
+            anim(m, xpos, ypos, *g > 0 ? m->img.key : m->img.keyboth, abs(*g));
+            xpos += m->img.key.w + 2;
+        }
+        // next line
         ypos += m->spellnameh + 4;
     }
 
-    // draw wizard
+    // draw wizards
     anim(m, 100, FLOOR_POS - m->img.wiz.h, m->img.wiz, 0);
+    animex(m, SCREEN_WIDTH - 100 - m->img.wiz.w, FLOOR_POS - m->img.wiz.h, m->img.wiz, 0,
+            0, 0, SDL_FLIP_HORIZONTAL);
 
-    // draw held gestures
+    // draw held gestures (TODO: positioning)
     if (b->lh != -1) anim(m, SCREEN_WIDTH/2 - m->spellnamew - m->img.gesture.w - 20, 200, b->lhf ? m->img.gesture : m->img.gesturefinal, b->lh);
     if (b->rh != -1) anim(m, SCREEN_WIDTH/2 + m->spellnamew + 20, 200, b->rhf ? m->img.gesture : m->img.gesturefinal, b->rh);
 
@@ -132,7 +144,7 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
     }
 
     /* // draw temporary text */
-    /* write(m, 10, 10, "Player 1"); */
+    write(m, 10, 10, "Player 1");
 
     // render everything
     SDL_RenderPresent(m->rend);
@@ -141,5 +153,7 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
 }
 
 void battle_destroy(struct battlestate *b) {
+    creature_destroy(&b->p1);
+    creature_destroy(&b->p2);
     free(b);
 }

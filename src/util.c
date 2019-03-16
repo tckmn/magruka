@@ -23,10 +23,23 @@ void draw(struct magruka *m, int x, int y, SDL_Rect clip) {
     SDL_RenderCopy(m->rend, m->img.spritesheet, &clip, &dest);
 }
 
+void drawex(struct magruka *m, int x, int y, SDL_Rect clip,
+        double angle, SDL_Point *center, SDL_RendererFlip flip) {
+    SDL_Rect dest = {x, y, clip.w, clip.h};
+    SDL_RenderCopyEx(m->rend, m->img.spritesheet, &clip, &dest, angle, center, flip);
+}
+
 void anim(struct magruka *m, int x, int y, SDL_Rect clip, int offs) {
     SDL_Rect src = {clip.x + offs*clip.w, clip.y, clip.w, clip.h};
     SDL_Rect dest = {x, y, clip.w, clip.h};
     SDL_RenderCopy(m->rend, m->img.spritesheet, &src, &dest);
+}
+
+void animex(struct magruka *m, int x, int y, SDL_Rect clip, int offs,
+        double angle, SDL_Point *center, SDL_RendererFlip flip) {
+    SDL_Rect src = {clip.x + offs*clip.w, clip.y, clip.w, clip.h};
+    SDL_Rect dest = {x, y, clip.w, clip.h};
+    SDL_RenderCopyEx(m->rend, m->img.spritesheet, &src, &dest, angle, center, flip);
 }
 
 void write(struct magruka *m, int x, int y, char *text) {
@@ -77,4 +90,26 @@ void drawtext(struct magruka *m, int x, int y, struct textimg text) {
     SDL_Rect src = {0, 0, text.w, text.h};
     SDL_Rect dest = {x, y, text.w, text.h};
     SDL_RenderCopy(m->rend, text.texture, &src, &dest);
+}
+
+/*
+ * convert gesture (e.g. 'W') to number (e.g. GESTURE_W)
+ * lowercase (both hands) becomes negative
+ */
+int g2n(char ch) {
+    switch (ch) {
+        case 'C': return GESTURE_C;
+        case 'D': return GESTURE_D;
+        case 'F': return GESTURE_F;
+        case 'P': return GESTURE_P;
+        case 'S': return GESTURE_S;
+        case 'W': return GESTURE_W;
+        case 'c': return -GESTURE_C;
+        case 'd': return -GESTURE_D;
+        case 'f': return -GESTURE_F;
+        case 'p': return -GESTURE_P;
+        case 's': return -GESTURE_S;
+        case 'w': return -GESTURE_W;
+    }
+    return 0;
 }
