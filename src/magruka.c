@@ -21,67 +21,8 @@
 #include <time.h>
 
 #include "magruka.h"
-
-void draw(struct magruka *m, int x, int y, SDL_Rect clip) {
-    SDL_Rect dest = {x, y, clip.w, clip.h};
-    SDL_RenderCopy(m->rend, m->img.spritesheet, &clip, &dest);
-}
-
-void anim(struct magruka *m, int x, int y, SDL_Rect clip, int offs) {
-    SDL_Rect src = {clip.x + offs*clip.w, clip.y, clip.w, clip.h};
-    SDL_Rect dest = {x, y, clip.w, clip.h};
-    SDL_RenderCopy(m->rend, m->img.spritesheet, &src, &dest);
-}
-
-void write(struct magruka *m, int x, int y, char *text) {
-    SDL_Rect src = {m->img.letters.x, m->img.letters.y, 0, m->img.letterh};
-    SDL_Rect dest = {x, y, 0, src.h};
-    for (; *text; ++text) {
-        if (*text == ' ') {
-            dest.x += 2*SCALE1 + SCALE1/2;
-        } else if (*text == '\n') {
-            dest.x = x;
-            dest.y += m->img.letterh;
-        } else {
-            int ch = 'A' <= *text && *text <= 'Z' ? *text - 'A' :
-                     'a' <= *text && *text <= 'z' ? *text - 'a' + 26 :
-                     '0' <= *text && *text <= '9' ? *text - '0' + 52 : 0;
-            src.x = m->img.letters.x + m->img.letterx[ch];
-            src.w = dest.w = m->img.letterw[ch];
-            SDL_RenderCopy(m->rend, m->img.spritesheet, &src, &dest);
-            dest.x += dest.w + SCALE1/2;
-        }
-    }
-}
-
-/*
- * returns a textimg with a NULL texture on error
- */
-struct textimg gentext(struct magruka *m, char *text) {
-    struct textimg img;
-    img.texture = 0;
-    SDL_Surface *tmp = TTF_RenderText_Solid(m->font, text, (SDL_Color){0xff, 0xff, 0xff, 0xff});
-    if (!tmp) {
-        fprintf(stderr, "could not render text image\n(SDL/TTF error: %s)\n",
-                TTF_GetError());
-        return img;
-    }
-    img.w = tmp->w;
-    img.h = tmp->h;
-    img.texture = SDL_CreateTextureFromSurface(m->rend, tmp);
-    SDL_FreeSurface(tmp);
-    if (!img.texture) {
-        fprintf(stderr, "could not optimize text image\n(SDL error: %s)\n",
-                SDL_GetError());
-    }
-    return img;
-}
-
-void drawtext(struct magruka *m, int x, int y, struct textimg text) {
-    SDL_Rect src = {0, 0, text.w, text.h};
-    SDL_Rect dest = {x, y, text.w, text.h};
-    SDL_RenderCopy(m->rend, text.texture, &src, &dest);
-}
+#include "util.h"
+#include "battle.h"
 
 /*
  * load all the data in the assets directory into memory
@@ -239,118 +180,17 @@ struct magruka *magruka_init() {
 }
 
 void magruka_main_loop(struct magruka *m) {
-    SDL_Event e;
-    int frame = 0;
+    // start in battle state
+    m->state = STATE_BATTLE;
+    struct battlestate *b = battle_init();
 
-    int lh = -1, rh = -1, lhf = 0, rhf = 0;
+    int ret;
     for (;;) {
-        while (SDL_PollEvent(&e)) {
-            switch (e.type) {
-
-            case SDL_QUIT:
-                return;
-
-            case SDL_KEYDOWN:
-                switch (e.key.keysym.sym) {
-                case SDLK_ESCAPE: return;
-
-                case 'q': lhf |= 1 << GESTURE_STAB; lh = GESTURE_STAB; break;
-                case 'w': lhf |= 1 << GESTURE_W;    lh = GESTURE_W;    break;
-                case 'e': lhf |= 1 << GESTURE_C;    lh = GESTURE_C;    break;
-                case 'r': lhf |= 1 << GESTURE_P;    lh = GESTURE_P;    break;
-                case 'a': lhf |= 1 << GESTURE_NONE; lh = GESTURE_NONE; break;
-                case 's': lhf |= 1 << GESTURE_S;    lh = GESTURE_S;    break;
-                case 'd': lhf |= 1 << GESTURE_D;    lh = GESTURE_D;    break;
-                case 'f': lhf |= 1 << GESTURE_F;    lh = GESTURE_F;    break;
-
-                case 'p': rhf |= 1 << GESTURE_STAB; rh = GESTURE_STAB; break;
-                case 'o': rhf |= 1 << GESTURE_W;    rh = GESTURE_W;    break;
-                case 'i': rhf |= 1 << GESTURE_C;    rh = GESTURE_C;    break;
-                case 'u': rhf |= 1 << GESTURE_P;    rh = GESTURE_P;    break;
-                case ';': rhf |= 1 << GESTURE_NONE; rh = GESTURE_NONE; break;
-                case 'l': rhf |= 1 << GESTURE_S;    rh = GESTURE_S;    break;
-                case 'k': rhf |= 1 << GESTURE_D;    rh = GESTURE_D;    break;
-                case 'j': rhf |= 1 << GESTURE_F;    rh = GESTURE_F;    break;
-
-                case ' ': lhf = 0; rhf = 0; lh = -1; rh = -1; break;
-
-                }
-                break;
-
-            case SDL_KEYUP:
-                switch (e.key.keysym.sym) {
-
-                case 'q': lhf &= ~(1 << GESTURE_STAB); break;
-                case 'w': lhf &= ~(1 << GESTURE_W);    break;
-                case 'e': lhf &= ~(1 << GESTURE_C);    break;
-                case 'r': lhf &= ~(1 << GESTURE_P);    break;
-                case 'a': lhf &= ~(1 << GESTURE_NONE); break;
-                case 's': lhf &= ~(1 << GESTURE_S);    break;
-                case 'd': lhf &= ~(1 << GESTURE_D);    break;
-                case 'f': lhf &= ~(1 << GESTURE_F);    break;
-
-                case 'p': rhf &= ~(1 << GESTURE_STAB); break;
-                case 'o': rhf &= ~(1 << GESTURE_W);    break;
-                case 'i': rhf &= ~(1 << GESTURE_C);    break;
-                case 'u': rhf &= ~(1 << GESTURE_P);    break;
-                case ';': rhf &= ~(1 << GESTURE_NONE); break;
-                case 'l': rhf &= ~(1 << GESTURE_S);    break;
-                case 'k': rhf &= ~(1 << GESTURE_D);    break;
-                case 'j': rhf &= ~(1 << GESTURE_F);    break;
-
-                }
-                break;
-
-            }
+        switch (m->state) {
+            case -1: return;
+            case STATE_BATTLE: ret = battle_main_loop(m, b); break;
         }
-
-        // start rendering stuff
-        SDL_RenderClear(m->rend);
-
-        // draw background tiles
-        for (int x = 0; x < SCREEN_WIDTH; x += m->img.wall.w) {
-            for (int y = 0; y < SCREEN_HEIGHT; y += m->img.wall.h) {
-                draw(m, x, y, m->img.wall);
-            }
-        }
-
-        // draw foreground floor
-        int top = 1;
-        for (int y = FLOOR_POS; y < SCREEN_HEIGHT; y += m->img.floor.h) {
-            for (int x = 0; x < SCREEN_WIDTH; x += m->img.floor.w) {
-                draw(m, x, y, top ? m->img.floortop : m->img.floor);
-            }
-            top = 0;
-        }
-
-        // draw spell list
-        int xpos = 10, ypos = 10;
-        for (struct spell *sp = m->spells; sp->name[0]; ++sp) {
-            drawtext(m, xpos, ypos, sp->nameimg);
-            ypos += m->spellnameh + 4;
-            if (ypos + m->spellnameh > SCREEN_HEIGHT) {
-                xpos += m->spellnamew;
-                ypos = 10;
-            }
-        }
-
-        // draw wizard
-        anim(m, 100, FLOOR_POS - m->img.wiz.h, m->img.wiz, 0);
-
-        // draw held gestures
-        if (lh != -1) anim(m, 200, 200, lhf ? m->img.gesture : m->img.gesturefinal, lh);
-        if (rh != -1) anim(m, 400, 200, rhf ? m->img.gesture : m->img.gesturefinal, rh);
-
-        // check for finalized turn
-        if (lh != -1 && rh != -1 && !lhf && !rhf) {
-            // TODO
-        }
-
-        /* // draw temporary text */
-        /* write(m, 10, 10, "Player 1"); */
-
-        // render everything
-        SDL_RenderPresent(m->rend);
+        if (ret) m->state = ret;
     }
 }
 

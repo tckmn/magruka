@@ -45,6 +45,8 @@
 #define GESTURE_STAB 6
 #define GESTURE_NONE 7
 
+#define STATE_BATTLE 1
+
 struct textimg {
     SDL_Texture *texture;
     int w;
@@ -59,10 +61,12 @@ struct spell {
 };
 
 struct magruka {
+    int state;
     SDL_Window *win;
     SDL_Surface *surf;
     SDL_Renderer *rend;
     TTF_Font *font;
+    SDL_Event e;
     struct {
         SDL_Texture *spritesheet;
         SDL_Rect wiz;
