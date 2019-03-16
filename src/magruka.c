@@ -152,14 +152,48 @@ int load_assets(struct magruka *m) {
         m->img.letterx[i] = x;
     }
 
-    m->spells = malloc(2 * sizeof *m->spells);
-    strcpy(m->spells[0].name, "Missile");
-    strcpy(m->spells[0].gesture, "SD");
-    m->spells[0].damage = 1;
-    m->spells[1].name[0] = 0;
+    // data file format is as follows:
+    //  * name followed by NUL
+    //  * gestures followed by NUL
+    //  * single byte with damage+128 (e.g. 0x80 = 0 damage)
+    //  * newline (for convenience in editing the file)
+    int ns = 0;
+    m->spells = malloc(sizeof *m->spells);
+    FILE *f = fopen("assets/data/spells.dat", "r");
+    if (!f) {
+        fprintf(stderr, "could not open spell data file\n");
+        return 1;
+    }
+    int ch, pos;
+    for (;;) {
+        // read name
+        pos = 0;
+        while (ch = getc(f)) {
+            if (ch == EOF) goto done;
+            m->spells[ns].name[pos++] = ch;
+        }
+        m->spells[ns].name[pos] = 0;
+        // read gestures
+        pos = 0;
+        while (ch = getc(f)) m->spells[ns].gesture[pos++] = ch;
+        m->spells[ns].gesture[pos] = 0;
+        // read damage
+        m->spells[ns].damage = getc(f) - 0x80;
+        // discard newline
+        if (getc(f) != '\n') {
+            fprintf(stderr, "corrupted spell data file\n");
+            return 1;
+        }
+        // append a new spell
+        m->spells = realloc(m->spells, (++ns + 1) * sizeof *m->spells);
+    }
+done:
 
+    m->spellnamew = m->spellnameh = 0;
     for (struct spell *sp = m->spells; sp->name[0]; ++sp) {
         sp->nameimg = gentext(m, sp->name);
+        if (sp->nameimg.w > m->spellnamew) m->spellnamew = sp->nameimg.w;
+        if (sp->nameimg.h > m->spellnameh) m->spellnameh = sp->nameimg.h;
         if (!sp->nameimg.texture) return 1;
     }
 
@@ -290,8 +324,14 @@ void magruka_main_loop(struct magruka *m) {
         }
 
         // draw spell list
+        int xpos = 10, ypos = 10;
         for (struct spell *sp = m->spells; sp->name[0]; ++sp) {
-            drawtext(m, 100, 100, sp->nameimg);
+            drawtext(m, xpos, ypos, sp->nameimg);
+            ypos += m->spellnameh + 4;
+            if (ypos + m->spellnameh > SCREEN_HEIGHT) {
+                xpos += m->spellnamew;
+                ypos = 10;
+            }
         }
 
         // draw wizard
@@ -306,8 +346,8 @@ void magruka_main_loop(struct magruka *m) {
             // TODO
         }
 
-        // draw temporary text
-        write(m, 10, 10, "Player 1");
+        /* // draw temporary text */
+        /* write(m, 10, 10, "Player 1"); */
 
         // render everything
         SDL_RenderPresent(m->rend);

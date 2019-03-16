@@ -77,6 +77,8 @@ struct magruka {
         int letterx[62];
     } img;
     struct spell *spells;
+    int spellnamew;
+    int spellnameh;
 };
 
 struct magruka *magruka_init(void);
