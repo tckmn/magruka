@@ -66,10 +66,10 @@ void write(struct magruka *m, int x, int y, char *text) {
 /*
  * returns a textimg with a NULL texture on error
  */
-struct textimg gentext(struct magruka *m, char *text) {
+struct textimg gentext(struct magruka *m, char *text, SDL_Color c) {
     struct textimg img;
     img.texture = 0;
-    SDL_Surface *tmp = TTF_RenderText_Solid(m->font, text, (SDL_Color){0xff, 0xff, 0xff, 0xff});
+    SDL_Surface *tmp = TTF_RenderText_Solid(m->font, text, c);
     if (!tmp) {
         fprintf(stderr, "could not render text image\n(SDL/TTF error: %s)\n",
                 TTF_GetError());

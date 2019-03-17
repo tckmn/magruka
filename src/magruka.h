@@ -51,6 +51,10 @@
 
 #define STATE_BATTLE 1
 
+static const SDL_Color COLOR_WHITE = {0xff, 0xff, 0xff, 0xff};
+static const SDL_Color COLOR_HPTEXT = {0xd4, 0x75, 0x8d, 0xff};
+static const SDL_Color COLOR_HPBAR = {0xa9, 0x1f, 0x42, 0xff};
+
 struct textimg {
     SDL_Texture *texture;
     int w;

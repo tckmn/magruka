@@ -142,7 +142,7 @@ done:
 
     m->spellnamew = m->spellnameh = 0;
     for (struct spell *sp = m->spells; sp->name[0]; ++sp) {
-        sp->nameimg = gentext(m, sp->name);
+        sp->nameimg = gentext(m, sp->name, COLOR_WHITE);
         if (sp->nameimg.w > m->spellnamew) m->spellnamew = sp->nameimg.w;
         if (sp->nameimg.h > m->spellnameh) m->spellnameh = sp->nameimg.h;
         if (!sp->nameimg.texture) return 1;

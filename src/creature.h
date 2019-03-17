@@ -21,12 +21,16 @@
 
 #include "magruka.h"
 
+#define MAX_NAME_LEN 50
+
 struct creature {
+    char name[MAX_NAME_LEN];
+    struct textimg nameimg;
     int hp, maxhp;
     struct textimg hpimg, maxhpimg;
 };
 
-void creature_init(struct magruka*, struct creature*, int);
+void creature_init(struct magruka*, struct creature*, char*, int);
 void creature_dmg(struct magruka*, struct creature*, int);
 void creature_destroy(struct creature*);
 

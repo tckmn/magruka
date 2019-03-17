@@ -19,12 +19,17 @@
 #include "creature.h"
 #include "util.h"
 
-void creature_init(struct magruka *m, struct creature *c, int hp) {
+void creature_init(struct magruka *m, struct creature *c, char *name, int hp) {
+    // do name
+    strncpy(c->name, name, MAX_NAME_LEN);
+    c->nameimg = gentext(m, c->name, COLOR_WHITE);
+
+    // do health
     c->hp = c->maxhp = hp;
     char s[12];
     snprintf(s, 12, "%d", hp);
-    c->hpimg = gentext(m, s);     // this gets destroyed separately
-    c->maxhpimg = gentext(m, s);  // so this needs to be different
+    c->hpimg = gentext(m, s, COLOR_HPTEXT);     // this gets destroyed separately
+    c->maxhpimg = gentext(m, s, COLOR_HPTEXT);  // so this needs to be different
 }
 
 void creature_dmg(struct magruka *m, struct creature *c, int dmg) {
@@ -33,7 +38,7 @@ void creature_dmg(struct magruka *m, struct creature *c, int dmg) {
     char s[12];
     snprintf(s, 12, "%d", c->hp);
     SDL_DestroyTexture(c->hpimg.texture);
-    c->hpimg = gentext(m, s);
+    c->hpimg = gentext(m, s, COLOR_HPTEXT);
 }
 
 void creature_destroy(struct creature *c) {

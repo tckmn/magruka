@@ -24,6 +24,7 @@ void drawhpbar(struct magruka *m, int x, int y, int flip, struct creature c, dou
         hbarx = flip ? circx - m->img.healthbar.w + SCALE1 : circx + m->img.healthcirc.w - SCALE1,
         capx = flip ? hbarx - m->img.healthcapl.w : hbarx + m->img.healthbar.w,
         endx = flip ? capx + m->img.healthend.w : capx,
+        namex = flip ? circx - c.nameimg.w : hbarx + SCALE1,
         barw = prop * (m->img.healthbar.w + SCALE1),
         barx = flip ? circx + SCALE1 - barw : hbarx;
 
@@ -32,13 +33,15 @@ void drawhpbar(struct magruka *m, int x, int y, int flip, struct creature c, dou
 
     // NOTE: this is hardcoded to the spritesheet
     SDL_Rect bar = {barx, y + 4*SCALE1, barw, 7*SCALE1};
-    SDL_SetRenderDrawColor(m->rend, 0xff, 0x00, 0x00, 0xff);
+    SDL_SetRenderDrawColor(m->rend, COLOR_HPBAR.r, COLOR_HPBAR.g, COLOR_HPBAR.b, COLOR_HPBAR.a);
     SDL_RenderFillRect(m->rend, &bar);
 
     draw(m, circx, y, m->img.healthcirc);
     draw(m, capx, y, flip ? m->img.healthcapl : m->img.healthcapr);
     drawtext(m, circx + m->img.healthcirc.w/2 - c.hpimg.w - 1, y + m->img.healthcirc.h/2 - c.hpimg.h - 1, c.hpimg);
     drawtext(m, circx + m->img.healthcirc.w/2 + 1, y + m->img.healthcirc.h/2 + 1, c.maxhpimg);
+
+    drawtext(m, namex, y, c.nameimg);
 }
 
 struct battlestate *battle_init(struct magruka *m) {
@@ -46,8 +49,8 @@ struct battlestate *battle_init(struct magruka *m) {
     b->lh = b->rh = -1;
     b->lhf = b->rhf = 0;
     b->page = 0;
-    creature_init(m, &b->p1, 15);
-    creature_init(m, &b->p2, 15);
+    creature_init(m, &b->p1, "Player 1", 15);
+    creature_init(m, &b->p2, "Player 2", 15);
     return b;
 }
 
@@ -165,9 +168,6 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
     if (b->lh != -1 && b->rh != -1 && !b->lhf && !b->rhf) {
         printf("it went\n");
     }
-
-    /* // draw temporary text */
-    /* write(m, 10, 10, "Player 1"); */
 
     // render everything
     SDL_RenderPresent(m->rend);
