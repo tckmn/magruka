@@ -19,24 +19,24 @@
 #ifndef __TASK_H__
 #define __TASK_H__
 
-struct task {
+struct taskfunc {
     int (*func)(void*);
     void *data;
+};
+
+struct task {
+    struct taskfunc tf;
     struct task *callback;
     struct task *next;
     struct task *prev;
 };
 
 struct task *task_init(void);
-void task_add(struct task*, int (*)(void*), void*, struct task*);
-struct task *task_callback(int (*)(void*), void*, struct task*);
+void task_add(struct task*, struct taskfunc, struct task*);
+struct task *task_callback(struct taskfunc, struct task*);
 void task_update(struct task*);
 void task_destroy(struct task*);
 
-struct set_int_data {
-    int *dest, src;
-};
-int set_int(struct set_int_data*);
-struct set_int_data* set_int_new(int*, int);
+struct taskfunc set_int(int*, int);
 
 #endif

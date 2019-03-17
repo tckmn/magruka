@@ -70,18 +70,7 @@ struct add_gestures_data {
     int lh, rh, n;
 };
 
-struct add_gestures_data *add_gestures_new(struct playerdata *pd, int lh, int rh) {
-    struct add_gestures_data *agd = malloc(sizeof *agd);
-    agd->pd = pd;
-    agd->lh = lh;
-    agd->rh = rh;
-    int n = 0;
-    for (int *lg = pd->lh; *lg != SPELL_END; ++lg) ++n;
-    agd->n = n;
-    return agd;
-}
-
-int add_gestures(struct add_gestures_data *agd) {
+int add_gestures_func(struct add_gestures_data *agd) {
     if (agd->pd->timer == 0) {
         agd->pd->timer = SDL_GetTicks();
         agd->pd->lh[agd->n] = agd->lh;
@@ -94,6 +83,17 @@ int add_gestures(struct add_gestures_data *agd) {
         return 1;
     }
     return 0;
+}
+
+struct taskfunc add_gestures(struct playerdata *pd, int lh, int rh) {
+    struct add_gestures_data *agd = malloc(sizeof *agd);
+    agd->pd = pd;
+    agd->lh = lh;
+    agd->rh = rh;
+    int n = 0;
+    for (int *lg = pd->lh; *lg != SPELL_END; ++lg) ++n;
+    agd->n = n;
+    return (struct taskfunc){add_gestures_func, agd};
 }
 
 struct battlestate *battle_init(struct magruka *m) {
@@ -250,10 +250,10 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
     if (b->polling && b->lh != -1 && b->rh != -1 && !b->lhf && !b->rhf) {
         b->polling = 0;
         task_add(b->tasks,
-                creature_animate, creature_animate_new(&b->p1, 1, 3, 100), task_callback(
-                add_gestures, add_gestures_new(b->p1.data, b->lh, b->rh), task_callback(
-                creature_animate, creature_animate_new(&b->p1, -1, 0, 100), task_callback(
-                set_int, set_int_new(&b->polling, 1), 0
+                creature_animate(&b->p1, 1, 3, 100), task_callback(
+                add_gestures(b->p1.data, b->lh, b->rh), task_callback(
+                creature_animate(&b->p1, -1, 0, 100), task_callback(
+                set_int(&b->polling, 1), 0
                 ))));
     }
 

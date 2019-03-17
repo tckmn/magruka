@@ -27,34 +27,32 @@ struct task *task_init() {
     return root;
 }
 
-void task_add(struct task *task, int (*func)(void*), void *data, struct task *callback) {
+void task_add(struct task *task, struct taskfunc tf, struct task *callback) {
     while (task->next) task = task->next;
     task->next = malloc(sizeof *task->next);
     task->next->prev = task;
     task->next->next = 0;
 
-    task->next->func = func;
-    task->next->data = data;
+    task->next->tf = tf;
     task->next->callback = callback;
 }
 
-struct task *task_callback(int (*func)(void*), void *data, struct task *callback) {
+struct task *task_callback(struct taskfunc tf, struct task *callback) {
     struct task *task = malloc(sizeof *task);
-    task->func = func;
-    task->data = data;
+    task->tf = tf;
     task->callback = callback;
     return task;
 }
 
 void task_update(struct task *task) {
     while ((task = task->next)) {
-        if ((*task->func)(task->data)) {
-            free(task->data);
+        if ((*task->tf.func)(task->tf.data)) {
+            free(task->tf.data);
             struct task *cb = task->callback;
             if (cb) {
                 // note that callback is run the frame *after* original finishes
-                task->func = cb->func;
-                task->data = cb->data;
+                task->tf.func = cb->tf.func;
+                task->tf.data = cb->tf.data;
                 task->callback = cb->callback;
                 free(cb);
             } else {
@@ -73,24 +71,28 @@ void task_destroy(struct task *task) {
         struct task *next = task->next, *cb = task->callback;
         while (cb) {
             struct task *cb2 = cb->callback;
-            free(cb->data);
+            free(cb->tf.data);
             free(cb);
             cb = cb2;
         }
-        free(task->data);
+        free(task->tf.data);
         free(task);
         task = next;
     }
 }
 
-int set_int(struct set_int_data *sid) {
+struct set_int_data {
+    int *dest, src;
+};
+
+int set_int_func(struct set_int_data *sid) {
     *sid->dest = sid->src;
     return 1;
 }
 
-struct set_int_data* set_int_new(int *dest, int src) {
+struct taskfunc set_int(int *dest, int src) {
     struct set_int_data *sid = malloc(sizeof *sid);
     sid->dest = dest;
     sid->src = src;
-    return sid;
+    return (struct taskfunc){set_int_func, sid};
 }
