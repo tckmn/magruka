@@ -74,6 +74,7 @@ int load_assets(struct magruka *m) {
     m->img.keybot       = R2(0,  4,   9,  5);
     m->img.keyall       = R2(0,  9,   9,  9);
     m->img.keyboth      = R2(0,  18,  9,  9);
+    m->img.handind      = R2(0,  27,  9,  9);
 
     m->img.letters     = P1(0, 53);
     m->img.letterw[0]  = 4; m->img.letterw[1]  = 4; m->img.letterw[2]  = 4;

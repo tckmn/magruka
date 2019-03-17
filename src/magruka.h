@@ -28,6 +28,7 @@
 
 #define SPELL_LIST_PAD 5
 #define SPELLS_PER_PAGE 21
+#define STATUS_PAD 10
 
 #define FLOOR_POS ((SCREEN_HEIGHT)*7/8)
 
@@ -82,6 +83,7 @@ struct magruka {
         SDL_Rect gesture, gesturefinal;
         SDL_Rect healthcirc, healthbar, healthend, healthcapr, healthcapl;
         SDL_Rect key, keytop, keybot, keyall, keyboth;
+        SDL_Rect handind;
         SDL_Point letters;
         int letterw[62];
         int letterh;

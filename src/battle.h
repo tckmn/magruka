@@ -23,9 +23,11 @@
 #include "creature.h"
 
 struct battlestate {
+    struct task *tasks;
     int lh, rh, lhf, rhf;
     int page;
     struct creature p1, p2;
+    int polling;
 };
 
 struct battlestate *battle_init(struct magruka*);

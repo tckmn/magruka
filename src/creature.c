@@ -30,6 +30,9 @@ void creature_init(struct magruka *m, struct creature *c, char *name, int hp) {
     snprintf(s, 12, "%d", hp);
     c->hpimg = gentext(m, s, COLOR_HPTEXT);     // this gets destroyed separately
     c->maxhpimg = gentext(m, s, COLOR_HPTEXT);  // so this needs to be different
+
+    // do data
+    c->data = 0;
 }
 
 void creature_dmg(struct magruka *m, struct creature *c, int dmg) {
@@ -41,7 +44,35 @@ void creature_dmg(struct magruka *m, struct creature *c, int dmg) {
     c->hpimg = gentext(m, s, COLOR_HPTEXT);
 }
 
+void creature_draw(struct magruka *m, struct creature *c) {
+    if (c->flip) {
+        animex(m, c->x, c->y, c->img, c->frame, 0, 0, SDL_FLIP_HORIZONTAL);
+    } else {
+        anim(m, c->x, c->y, c->img, c->frame);
+    }
+}
+
 void creature_destroy(struct creature *c) {
     SDL_DestroyTexture(c->hpimg.texture);
     SDL_DestroyTexture(c->maxhpimg.texture);
+    free(c->data);
+}
+
+int creature_animate(struct creature_animate_data *cad) {
+    Uint32 now = SDL_GetTicks();
+    if (SDL_TICKS_PASSED(now, cad->timer + cad->speed)) {
+        if (cad->c->frame >= cad->endframe) return 1;
+        ++cad->c->frame;
+        cad->timer = now;
+    }
+    return 0;
+}
+
+struct creature_animate_data *creature_animate_new(struct creature *c, int endframe, Uint32 speed) {
+    struct creature_animate_data *cad = malloc(sizeof *cad);
+    cad->c = c;
+    cad->endframe = endframe;
+    cad->speed = speed;
+    cad->timer = SDL_GetTicks();
+    return cad;
 }

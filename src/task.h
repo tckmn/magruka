@@ -16,40 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __CREATURE_H__
-#define __CREATURE_H__
+#ifndef __TASK_H__
+#define __TASK_H__
 
-#include "magruka.h"
-
-#define MAX_NAME_LEN 50
-
-struct playerdata {
-    int lh[10], rh[10];
-};
-
-struct creature {
-    char name[MAX_NAME_LEN];
-    struct textimg nameimg;
-    int hp, maxhp;
-    struct textimg hpimg, maxhpimg;
-    int x, y;
-    SDL_Rect img;
-    int frame;
-    int flip;
+struct task {
+    int (*func)(void*);
     void *data;
+    struct task *callback;
+    struct task *next;
+    struct task *prev;
 };
 
-void creature_init(struct magruka*, struct creature*, char*, int);
-void creature_dmg(struct magruka*, struct creature*, int);
-void creature_draw(struct magruka*, struct creature*);
-void creature_destroy(struct creature*);
-
-struct creature_animate_data {
-    struct creature *c;
-    int endframe;
-    Uint32 speed, timer;
-};
-int creature_animate(struct creature_animate_data*);
-struct creature_animate_data *creature_animate_new(struct creature*, int, Uint32);
+struct task *task_init(void);
+void task_add(struct task*, int (*)(void*), void*, struct task*);
+struct task *task_callback(int (*)(void*), void*, struct task*);
+void task_update(struct task*);
+void task_destroy(struct task*);
 
 #endif
