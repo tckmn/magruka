@@ -25,6 +25,7 @@
 
 struct playerdata {
     int lh[10], rh[10];
+    Uint32 timer;
 };
 
 struct creature {
@@ -46,10 +47,10 @@ void creature_destroy(struct creature*);
 
 struct creature_animate_data {
     struct creature *c;
-    int endframe;
+    int delta, endframe;
     Uint32 speed, timer;
 };
 int creature_animate(struct creature_animate_data*);
-struct creature_animate_data *creature_animate_new(struct creature*, int, Uint32);
+struct creature_animate_data *creature_animate_new(struct creature*, int, int, Uint32);
 
 #endif

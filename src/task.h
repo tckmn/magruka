@@ -33,4 +33,10 @@ struct task *task_callback(int (*)(void*), void*, struct task*);
 void task_update(struct task*);
 void task_destroy(struct task*);
 
+struct set_int_data {
+    int *dest, src;
+};
+int set_int(struct set_int_data*);
+struct set_int_data* set_int_new(int*, int);
+
 #endif

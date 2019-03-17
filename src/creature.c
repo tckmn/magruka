@@ -61,16 +61,17 @@ void creature_destroy(struct creature *c) {
 int creature_animate(struct creature_animate_data *cad) {
     Uint32 now = SDL_GetTicks();
     if (SDL_TICKS_PASSED(now, cad->timer + cad->speed)) {
-        if (cad->c->frame >= cad->endframe) return 1;
-        ++cad->c->frame;
+        if (cad->c->frame == cad->endframe) return 1;
+        cad->c->frame += cad->delta;
         cad->timer = now;
     }
     return 0;
 }
 
-struct creature_animate_data *creature_animate_new(struct creature *c, int endframe, Uint32 speed) {
+struct creature_animate_data *creature_animate_new(struct creature *c, int delta, int endframe, Uint32 speed) {
     struct creature_animate_data *cad = malloc(sizeof *cad);
     cad->c = c;
+    cad->delta = delta;
     cad->endframe = endframe;
     cad->speed = speed;
     cad->timer = SDL_GetTicks();

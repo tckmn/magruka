@@ -82,3 +82,15 @@ void task_destroy(struct task *task) {
         task = next;
     }
 }
+
+int set_int(struct set_int_data *sid) {
+    *sid->dest = sid->src;
+    return 1;
+}
+
+struct set_int_data* set_int_new(int *dest, int src) {
+    struct set_int_data *sid = malloc(sizeof *sid);
+    sid->dest = dest;
+    sid->src = src;
+    return sid;
+}

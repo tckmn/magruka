@@ -65,6 +65,37 @@ int drawgest(struct magruka *m, int x, int y, struct playerdata *p) {
     return y2 + m->img.handind.h;
 }
 
+struct add_gestures_data {
+    struct playerdata *pd;
+    int lh, rh, n;
+};
+
+struct add_gestures_data *add_gestures_new(struct playerdata *pd, int lh, int rh) {
+    struct add_gestures_data *agd = malloc(sizeof *agd);
+    agd->pd = pd;
+    agd->lh = lh;
+    agd->rh = rh;
+    int n = 0;
+    for (int *lg = pd->lh; *lg != SPELL_END; ++lg) ++n;
+    agd->n = n;
+    return agd;
+}
+
+int add_gestures(struct add_gestures_data *agd) {
+    if (agd->pd->timer == 0) {
+        agd->pd->timer = SDL_GetTicks();
+        agd->pd->lh[agd->n] = agd->lh;
+        agd->pd->rh[agd->n] = agd->rh;
+        agd->pd->lh[agd->n+1] = SPELL_END;
+        agd->pd->rh[agd->n+1] = SPELL_END;
+    }
+    if (SDL_TICKS_PASSED(SDL_GetTicks(), agd->pd->timer + 1000)) {
+        agd->pd->timer = 0;
+        return 1;
+    }
+    return 0;
+}
+
 struct battlestate *battle_init(struct magruka *m) {
     struct battlestate *b = malloc(sizeof *b);
 
@@ -79,6 +110,7 @@ struct battlestate *battle_init(struct magruka *m) {
     struct playerdata *pd1 = malloc(sizeof *pd1),
                       *pd2 = malloc(sizeof *pd2);
     pd1->lh[0] = pd1->rh[0] = pd2->lh[0] = pd2->rh[0] = SPELL_END;
+    pd1->timer = pd2->timer = 0;
     b->p1.data = pd1;
     b->p2.data = pd2;
 
@@ -217,7 +249,12 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
     // check for finalized turn
     if (b->polling && b->lh != -1 && b->rh != -1 && !b->lhf && !b->rhf) {
         b->polling = 0;
-        task_add(b->tasks, creature_animate, creature_animate_new(&b->p1, 3, 100), 0);
+        task_add(b->tasks,
+                creature_animate, creature_animate_new(&b->p1, 1, 3, 100), task_callback(
+                add_gestures, add_gestures_new(b->p1.data, b->lh, b->rh), task_callback(
+                creature_animate, creature_animate_new(&b->p1, -1, 0, 100), task_callback(
+                set_int, set_int_new(&b->polling, 1), 0
+                ))));
     }
 
     // render everything
