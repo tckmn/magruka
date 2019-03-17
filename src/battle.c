@@ -252,9 +252,12 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
         task_add(b->tasks,
                 creature_animate(&b->p1, 1, 3, 100), task_callback(
                 add_gestures(b->p1.data, b->lh, b->rh), task_callback(
-                creature_animate(&b->p1, -1, 0, 100), task_callback(
-                set_int(&b->polling, 1), 0
-                ))));
+                creature_animate(&b->p1, -1, 0, 100),
+                    task_seq(task_callback(set_int(&b->rh, -1), 0),
+                    task_seq(task_callback(set_int(&b->lh, -1), 0),
+                             task_callback(set_int(&b->polling, 1), 0)
+                    ))
+                )));
     }
 
     // render everything

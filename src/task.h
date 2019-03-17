@@ -34,6 +34,7 @@ struct task {
 struct task *task_init(void);
 void task_add(struct task*, struct taskfunc, struct task*);
 struct task *task_callback(struct taskfunc, struct task*);
+struct task *task_seq(struct task*, struct task*);
 void task_update(struct task*);
 void task_destroy(struct task*);
 

@@ -41,7 +41,14 @@ struct task *task_callback(struct taskfunc tf, struct task *callback) {
     struct task *task = malloc(sizeof *task);
     task->tf = tf;
     task->callback = callback;
+    task->next = task->prev = 0;
     return task;
+}
+
+struct task *task_seq(struct task *head, struct task *rest) {
+    head->next = rest;
+    rest->prev = head;
+    return head;
 }
 
 void task_update(struct task *task) {
@@ -50,11 +57,18 @@ void task_update(struct task *task) {
             free(task->tf.data);
             struct task *cb = task->callback;
             if (cb) {
-                // note that callback is run the frame *after* original finishes
-                task->tf.func = cb->tf.func;
-                task->tf.data = cb->tf.data;
-                task->callback = cb->callback;
-                free(cb);
+                // note that callback is run the same frame original finishes
+                struct task *tail = cb;
+                while (tail->next) tail = tail->next;
+
+                cb->prev = task->prev;
+                task->prev->next = cb;
+
+                tail->next = task->next;
+                if (task->next) task->next->prev = tail;
+
+                free(task);
+                task = cb->prev;
             } else {
                 struct task *prev = task->prev;
                 prev->next = task->next;
