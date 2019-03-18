@@ -77,7 +77,6 @@ int drawgest(struct magruka *m, int x, int y, struct playerdata *p) {
 }
 
 #define EXPLODE_PARAMS 1, 0, rd2(-2,2), rd2(-3,0), -0.01, rd2(-0.01,0.01), 0, 0.1, 0, 0
-#define NO_PARAMS 1, 0, 0, 0, 0, 0, 0, 0, 0, 0
 void explode_c(struct magruka *m, struct particle *particles, int xpos) {
     particle_add(particles, (struct particledata){xpos + SCALE1*15, HAND_Y - SCALE1*1,  EXPLODE_PARAMS, m->img.c_particles, 0});
     particle_add(particles, (struct particledata){xpos + SCALE1*9,  HAND_Y + SCALE1*0,  EXPLODE_PARAMS, m->img.c_particles, 1});
@@ -164,6 +163,18 @@ void explode_none(struct magruka *m, struct particle *particles, int xpos) {
     particle_add(particles, (struct particledata){xpos + SCALE1*12, HAND_Y + SCALE1*12, EXPLODE_PARAMS, m->img.none_particles, 3});
     particle_add(particles, (struct particledata){xpos + SCALE1*17, HAND_Y + SCALE1*12, EXPLODE_PARAMS, m->img.none_particles, 4});
 }
+void explode(struct magruka *m, struct particle *particles, int xpos, int g) {
+    switch (g) {
+    case 0: explode_c(m, particles, xpos); break;
+    case 1: explode_d(m, particles, xpos); break;
+    case 2: explode_f(m, particles, xpos); break;
+    case 3: explode_p(m, particles, xpos); break;
+    case 4: explode_s(m, particles, xpos); break;
+    case 5: explode_w(m, particles, xpos); break;
+    case 6: explode_stab(m, particles, xpos); break;
+    case 7: explode_none(m, particles, xpos); break;
+    }
+}
 
 struct add_gestures_data {
     struct playerdata *pd;
@@ -178,26 +189,8 @@ int add_gestures_func(struct magruka *m, struct battlestate *b, struct add_gestu
         agd->pd->lh[agd->n+1] = SPELL_END;
         agd->pd->rh[agd->n+1] = SPELL_END;
 
-        switch (b->lh) {
-        case 0: explode_c(m, b->particles, LH_POS(m)); break;
-        case 1: explode_d(m, b->particles, LH_POS(m)); break;
-        case 2: explode_f(m, b->particles, LH_POS(m)); break;
-        case 3: explode_p(m, b->particles, LH_POS(m)); break;
-        case 4: explode_s(m, b->particles, LH_POS(m)); break;
-        case 5: explode_w(m, b->particles, LH_POS(m)); break;
-        case 6: explode_stab(m, b->particles, LH_POS(m)); break;
-        case 7: explode_none(m, b->particles, LH_POS(m)); break;
-        }
-        switch (b->rh) {
-        case 0: explode_c(m, b->particles, RH_POS(m)); break;
-        case 1: explode_d(m, b->particles, RH_POS(m)); break;
-        case 2: explode_f(m, b->particles, RH_POS(m)); break;
-        case 3: explode_p(m, b->particles, RH_POS(m)); break;
-        case 4: explode_s(m, b->particles, RH_POS(m)); break;
-        case 5: explode_w(m, b->particles, RH_POS(m)); break;
-        case 6: explode_stab(m, b->particles, RH_POS(m)); break;
-        case 7: explode_none(m, b->particles, RH_POS(m)); break;
-        }
+        explode(m, b->particles, LH_POS(m), b->lh);
+        explode(m, b->particles, RH_POS(m), b->rh);
 
         b->lh = -1; b->rh = -1;
     } else if (SDL_TICKS_PASSED(SDL_GetTicks(), agd->pd->timer + GESTURE_DURATION)) {
