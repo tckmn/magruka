@@ -76,6 +76,7 @@ int drawgest(struct magruka *m, int x, int y, struct playerdata *p) {
 }
 
 #define EXPLODE_PARAMS 1, rd2(-2,2), rd2(-2,0), -0.01, 0, 0.1, 0
+#define NO_PARAMS 1, 0, 0, 0, 0, 0, 0
 void explode_c(struct magruka *m, struct particle *particles, int xpos) {
     particle_add(particles, (struct particledata){xpos + SCALE1*15, HAND_Y - SCALE1*1,  EXPLODE_PARAMS, m->img.c_particles, 0});
     particle_add(particles, (struct particledata){xpos + SCALE1*9,  HAND_Y + SCALE1*0,  EXPLODE_PARAMS, m->img.c_particles, 1});
@@ -99,6 +100,22 @@ void explode_d(struct magruka *m, struct particle *particles, int xpos) {
     particle_add(particles, (struct particledata){xpos + SCALE1*2,  HAND_Y + SCALE1*11, EXPLODE_PARAMS, m->img.d_particles, 8});
     particle_add(particles, (struct particledata){xpos + SCALE1*0,  HAND_Y + SCALE1*5,  EXPLODE_PARAMS, m->img.d_particles, 9});
 }
+void explode_f(struct magruka *m, struct particle *particles, int xpos) {
+    particle_add(particles, (struct particledata){xpos + SCALE1*16, HAND_Y - SCALE1*1,  EXPLODE_PARAMS, m->img.f_particles, 0});
+    particle_add(particles, (struct particledata){xpos + SCALE1*9,  HAND_Y + SCALE1*0,  EXPLODE_PARAMS, m->img.f_particles, 1});
+    particle_add(particles, (struct particledata){xpos + SCALE1*3,  HAND_Y + SCALE1*0,  EXPLODE_PARAMS, m->img.f_particles, 2});
+    particle_add(particles, (struct particledata){xpos + SCALE1*4,  HAND_Y + SCALE1*7,  EXPLODE_PARAMS, m->img.f_particles, 3});
+    particle_add(particles, (struct particledata){xpos + SCALE1*9,  HAND_Y + SCALE1*11, EXPLODE_PARAMS, m->img.f_particles, 4});
+    particle_add(particles, (struct particledata){xpos + SCALE1*14, HAND_Y + SCALE1*11, EXPLODE_PARAMS, m->img.f_particles, 5});
+    particle_add(particles, (struct particledata){xpos + SCALE1*3,  HAND_Y + SCALE1*14, EXPLODE_PARAMS, m->img.f_particles, 6});
+    particle_add(particles, (struct particledata){xpos + SCALE1*2,  HAND_Y + SCALE1*20, EXPLODE_PARAMS, m->img.f_particles, 7});
+}
+void explode_p(struct magruka *m, struct particle *particles, int xpos) {
+}
+void explode_s(struct magruka *m, struct particle *particles, int xpos) {
+}
+void explode_w(struct magruka *m, struct particle *particles, int xpos) {
+}
 
 struct add_gestures_data {
     struct playerdata *pd;
@@ -113,9 +130,22 @@ int add_gestures_func(struct magruka *m, struct battlestate *b, struct add_gestu
         agd->pd->lh[agd->n+1] = SPELL_END;
         agd->pd->rh[agd->n+1] = SPELL_END;
 
-        const int L = LH_POS(m), R = RH_POS(m);
-        explode_c(m, b->particles, L);
-        explode_d(m, b->particles, R);
+        switch (b->lh) {
+        case 0: explode_c(m, b->particles, LH_POS(m)); break;
+        case 1: explode_d(m, b->particles, LH_POS(m)); break;
+        case 2: explode_f(m, b->particles, LH_POS(m)); break;
+        case 3: explode_p(m, b->particles, LH_POS(m)); break;
+        case 4: explode_s(m, b->particles, LH_POS(m)); break;
+        case 5: explode_w(m, b->particles, LH_POS(m)); break;
+        }
+        switch (b->rh) {
+        case 0: explode_c(m, b->particles, RH_POS(m)); break;
+        case 1: explode_d(m, b->particles, RH_POS(m)); break;
+        case 2: explode_f(m, b->particles, RH_POS(m)); break;
+        case 3: explode_p(m, b->particles, RH_POS(m)); break;
+        case 4: explode_s(m, b->particles, RH_POS(m)); break;
+        case 5: explode_w(m, b->particles, RH_POS(m)); break;
+        }
 
         b->lh = -1; b->rh = -1;
     } else if (SDL_TICKS_PASSED(SDL_GetTicks(), agd->pd->timer + GESTURE_DURATION)) {
