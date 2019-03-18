@@ -37,8 +37,8 @@ void particle_add(struct particle *p, struct particledata d) {
 
 void particle_update(struct particle *p) {
     while ((p = p->next)) {
-        p->d.x  += p->d.xv; p->d.y  += p->d.yv; p->d.a  += p->d.av;
-        p->d.xv += p->d.xa; p->d.yv += p->d.ya; p->d.av += p->d.aa;
+        p->d.x  += p->d.xv; p->d.y  += p->d.yv; p->d.a  += p->d.av; p->d.r  += p->d.rv;
+        p->d.xv += p->d.xa; p->d.yv += p->d.ya; p->d.av += p->d.aa; p->d.rv += p->d.ra;
         if (p->d.a <= 0) {
             p->prev->next = p->next;
             if (p->next) p->next->prev = p->prev;
@@ -52,7 +52,7 @@ void particle_update(struct particle *p) {
 void particle_draw(struct magruka *m, struct particle *p) {
     while ((p = p->next)) {
         alph(m, p->d.a*0xff);
-        anim(m, p->d.x, p->d.y, p->d.img, p->d.frame);
+        animex(m, p->d.x, p->d.y, p->d.img, p->d.frame, p->d.r*360, 0, 0);
     }
     alph(m, 0xff);
 }

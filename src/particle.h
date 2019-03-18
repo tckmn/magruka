@@ -23,7 +23,7 @@
 
 struct particle {
     struct particledata {
-        double x, y, a, xv, yv, av, xa, ya, aa;
+        double x, y, a, r, xv, yv, av, rv, xa, ya, aa, ra;
         SDL_Rect img;
         int frame;
     } d;
