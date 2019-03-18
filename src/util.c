@@ -42,6 +42,10 @@ void animex(struct magruka *m, int x, int y, SDL_Rect clip, int offs,
     SDL_RenderCopyEx(m->rend, m->img.spritesheet, &src, &dest, angle, center, flip);
 }
 
+void alph(struct magruka *m, Uint8 a) {
+    SDL_SetTextureAlphaMod(m->img.spritesheet, a);
+}
+
 void write(struct magruka *m, int x, int y, char *text) {
     SDL_Rect src = {m->img.letters.x, m->img.letters.y, 0, m->img.letterh};
     SDL_Rect dest = {x, y, 0, src.h};

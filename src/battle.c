@@ -58,10 +58,16 @@ int drawgest(struct magruka *m, int x, int y, struct playerdata *p) {
 
     int xpos = x + m->img.handind.w*2;
     for (int *lg = p->lh, *rg = p->rh; *lg != SPELL_END; ++lg, ++rg) {
+        if (p->timer != 0 && lg[1] == SPELL_END) {
+            int diff = SDL_GetTicks() - p->timer;
+            xpos += 20 - diff * 20 / 1000;
+            alph(m, diff * 0xff / 1000);
+        }
         anim(m, xpos, y1, m->img.key, *lg);
         anim(m, xpos, y2, m->img.key, *rg);
         xpos += m->img.key.w + 4;
     }
+    if (p->timer != 0) alph(m, 0xff);
 
     return y2 + m->img.handind.h;
 }
@@ -78,8 +84,7 @@ int add_gestures_func(struct add_gestures_data *agd) {
         agd->pd->rh[agd->n] = agd->rh;
         agd->pd->lh[agd->n+1] = SPELL_END;
         agd->pd->rh[agd->n+1] = SPELL_END;
-    }
-    if (SDL_TICKS_PASSED(SDL_GetTicks(), agd->pd->timer + 1000)) {
+    } else if (SDL_TICKS_PASSED(SDL_GetTicks(), agd->pd->timer + 1000)) {
         agd->pd->timer = 0;
         return 1;
     }

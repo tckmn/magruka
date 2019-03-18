@@ -45,6 +45,7 @@ int load_assets(struct magruka *m) {
                 IMG_GetError());
         return 1;
     }
+    SDL_SetTextureBlendMode(m->img.spritesheet, SDL_BLENDMODE_BLEND);
 
     if (TTF_Init() == -1) {
         printf("could not initialize TTF library\n(SDL/TTF error: %s)\n",
