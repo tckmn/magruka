@@ -185,14 +185,15 @@ void explode(struct magruka *m, struct particle *particles, int xpos, int g) {
     }
 }
 
-#define NPOOFS 8
+#define POOF_PARAMS 1, 0, rd2(-3,3), rd2(-4,1), -0.03, rd2(-0.05,0.05), 0, 0.1, 0, 0
+#define NPOOFS 15
 void dopoof(struct magruka *m, struct particle *particles, int xpos, int finalized) {
     for (int f = 0; f < 3; ++f) {
         for (int i = 0; i < NPOOFS; ++i) {
             particle_add(particles, (struct particledata){
                     xpos + ri1(m->img.gesture.w),
                     HAND_Y + ri1(m->img.gesture.h),
-                    EXPLODE_PARAMS,
+                    POOF_PARAMS,
                     finalized ? m->img.gfparticles : m->img.gparticles, f
                     });
         }
@@ -378,8 +379,8 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
         // draw poofy particles, if any
         if (poof & 1) dopoof(m, b->particles, LH_POS(m), 0);
         if (poof & 2) dopoof(m, b->particles, RH_POS(m), 0);
-        if ((poof & 4) && !b->lhf) dopoof(m, b->particles, LH_POS(m), 1);
-        if ((poof & 8) && !b->rhf) dopoof(m, b->particles, RH_POS(m), 1);
+        if ((poof & 4) && !b->lhf && b->lh != -1) dopoof(m, b->particles, LH_POS(m), 1);
+        if ((poof & 8) && !b->rhf && b->rh != -1) dopoof(m, b->particles, RH_POS(m), 1);
     }
 
     // draw wizards
