@@ -30,6 +30,8 @@
 #define SPELLS_PER_PAGE 21
 #define STATUS_PAD 10
 
+#define GESTURE_DURATION 800
+
 #define FLOOR_POS ((SCREEN_HEIGHT)*7/8)
 
 #define SCALE1 4

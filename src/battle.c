@@ -50,8 +50,10 @@ int drawhpbar(struct magruka *m, int x, int y, int flip, struct creature c, doub
     return y + m->img.healthcirc.h;
 }
 
+#define DRAWGEST_PAD 4
+#define DRAWGEST_LEN 15
 int drawgest(struct magruka *m, int x, int y, struct playerdata *p) {
-    int y1 = y, y2 = y + m->img.handind.h + 4;
+    int y1 = y, y2 = y + m->img.handind.h + DRAWGEST_PAD;
 
     anim(m, x + m->img.handind.w/2, y1, m->img.handind, 1);
     anim(m, x + m->img.handind.w/2, y2, m->img.handind, 0);
@@ -60,12 +62,12 @@ int drawgest(struct magruka *m, int x, int y, struct playerdata *p) {
     for (int *lg = p->lh, *rg = p->rh; *lg != SPELL_END; ++lg, ++rg) {
         if (p->timer != 0 && lg[1] == SPELL_END) {
             int diff = SDL_GetTicks() - p->timer;
-            xpos += 20 - diff * 20 / 1000;
-            alph(m, diff * 0xff / 1000);
+            xpos += DRAWGEST_LEN - diff * DRAWGEST_LEN / GESTURE_DURATION;
+            alph(m, diff * 0xff / GESTURE_DURATION);
         }
         anim(m, xpos, y1, m->img.key, *lg);
         anim(m, xpos, y2, m->img.key, *rg);
-        xpos += m->img.key.w + 4;
+        xpos += m->img.key.w + DRAWGEST_PAD;
     }
     if (p->timer != 0) alph(m, 0xff);
 
@@ -84,7 +86,7 @@ int add_gestures_func(struct add_gestures_data *agd) {
         agd->pd->rh[agd->n] = agd->rh;
         agd->pd->lh[agd->n+1] = SPELL_END;
         agd->pd->rh[agd->n+1] = SPELL_END;
-    } else if (SDL_TICKS_PASSED(SDL_GetTicks(), agd->pd->timer + 1000)) {
+    } else if (SDL_TICKS_PASSED(SDL_GetTicks(), agd->pd->timer + GESTURE_DURATION)) {
         agd->pd->timer = 0;
         return 1;
     }
