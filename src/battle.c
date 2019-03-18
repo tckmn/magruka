@@ -63,6 +63,7 @@ int drawgest(struct magruka *m, int x, int y, struct playerdata *p) {
     for (int *lg = p->lh, *rg = p->rh; *lg != SPELL_END; ++lg, ++rg) {
         if (p->timer != 0 && lg[1] == SPELL_END) {
             int diff = SDL_GetTicks() - p->timer;
+            if (diff > GESTURE_DURATION) diff = GESTURE_DURATION;
             xpos += DRAWGEST_LEN - diff * DRAWGEST_LEN / GESTURE_DURATION;
             alph(m, diff * 0xff / GESTURE_DURATION);
         }
@@ -75,7 +76,7 @@ int drawgest(struct magruka *m, int x, int y, struct playerdata *p) {
     return y2 + m->img.handind.h;
 }
 
-#define EXPLODE_PARAMS 1, 0, rd2(-2,2), rd2(-2,0), -0.01, rd2(-0.01,0.01), 0, 0.1, 0, 0
+#define EXPLODE_PARAMS 1, 0, rd2(-2,2), rd2(-3,0), -0.01, rd2(-0.01,0.01), 0, 0.1, 0, 0
 #define NO_PARAMS 1, 0, 0, 0, 0, 0, 0, 0
 void explode_c(struct magruka *m, struct particle *particles, int xpos) {
     particle_add(particles, (struct particledata){xpos + SCALE1*15, HAND_Y - SCALE1*1,  EXPLODE_PARAMS, m->img.c_particles, 0});
