@@ -80,6 +80,7 @@ void task_update(struct task *task) {
     }
 }
 
+// TODO this does not free memory from multiple callbacks
 void task_destroy(struct task *task) {
     while (task) {
         struct task *next = task->next, *cb = task->callback;

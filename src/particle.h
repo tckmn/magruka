@@ -16,23 +16,25 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __BATTLE_H__
-#define __BATTLE_H__
+#ifndef __PARTICLE_H__
+#define __PARTICLE_H__
 
 #include "magruka.h"
-#include "creature.h"
 
-struct battlestate {
-    struct task *tasks;
-    struct particle *particles;
-    int lh, rh, lhf, rhf;
-    int page;
-    struct creature p1, p2;
-    int polling;
+struct particle {
+    struct particledata {
+        double x, y, a, xv, yv, av, xa, ya, aa;
+        SDL_Rect img;
+        int frame;
+    } d;
+    struct particle *next;
+    struct particle *prev;
 };
 
-struct battlestate *battle_init(struct magruka*);
-int battle_main_loop(struct magruka*, struct battlestate*);
-void battle_destroy(struct battlestate*);
+struct particle *particle_init(void);
+void particle_add(struct particle*, struct particledata);
+void particle_update(struct particle*);
+void particle_draw(struct magruka*, struct particle*);
+void particle_destroy(struct particle*);
 
 #endif

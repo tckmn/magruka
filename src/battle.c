@@ -19,6 +19,7 @@
 #include "battle.h"
 #include "util.h"
 #include "task.h"
+#include "particle.h"
 
 int drawhpbar(struct magruka *m, int x, int y, int flip, struct creature c, double prop) {
     // negative proportion = automatically calculate
@@ -108,6 +109,7 @@ struct battlestate *battle_init(struct magruka *m) {
     struct battlestate *b = malloc(sizeof *b);
 
     b->tasks = task_init();
+    b->particles = particle_init();
 
     b->lh = b->rh = -1;
     b->lhf = b->rhf = 0;
@@ -135,6 +137,7 @@ struct battlestate *battle_init(struct magruka *m) {
 
 int battle_main_loop(struct magruka *m, struct battlestate *b) {
     task_update(b->tasks);
+    particle_update(b->particles);
 
     while (SDL_PollEvent(&m->e)) {
         switch (m->e.type) {
@@ -275,6 +278,7 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
 
 void battle_destroy(struct battlestate *b) {
     task_destroy(b->tasks);
+    particle_destroy(b->particles);
     creature_destroy(&b->p1);
     creature_destroy(&b->p2);
     free(b);
