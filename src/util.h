@@ -32,5 +32,7 @@ void drawtext(struct magruka*, int, int, struct textimg);
 int g2n(char);
 double rd();
 double rd2(double, double);
+int ri1(int);
+int ri2(int, int);
 
 #endif

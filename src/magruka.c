@@ -78,6 +78,8 @@ int load_assets(struct magruka *m) {
     m->img.w_particles    = R1(110, 164, 11, 11);
     m->img.stab_particles = R1(0,   175, 11, 11);
     m->img.none_particles = R1(110, 175, 11, 11);
+    m->img.gparticles     = R1(0,   186, 5,  5);
+    m->img.gfparticles    = R1(15,  186, 5,  5);
     m->img.key            = R2(0,   0,   9,  9);
     m->img.keytop         = R2(0,   0,   9,  5);
     m->img.keybot         = R2(0,   4,   9,  5);

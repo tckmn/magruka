@@ -91,6 +91,7 @@ struct magruka {
         SDL_Rect gesture, gesturefinal;
         SDL_Rect healthcirc, healthbar, healthend, healthcapr, healthcapl;
         SDL_Rect c_particles, d_particles, f_particles, p_particles, s_particles, w_particles, stab_particles, none_particles;
+        SDL_Rect gparticles, gfparticles;
         SDL_Rect key, keytop, keybot, keyall, keyboth;
         SDL_Rect handind;
         SDL_Point letters;

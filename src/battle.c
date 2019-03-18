@@ -185,6 +185,20 @@ void explode(struct magruka *m, struct particle *particles, int xpos, int g) {
     }
 }
 
+#define NPOOFS 8
+void dopoof(struct magruka *m, struct particle *particles, int xpos, int finalized) {
+    for (int f = 0; f < 3; ++f) {
+        for (int i = 0; i < NPOOFS; ++i) {
+            particle_add(particles, (struct particledata){
+                    xpos + ri1(m->img.gesture.w),
+                    HAND_Y + ri1(m->img.gesture.h),
+                    EXPLODE_PARAMS,
+                    finalized ? m->img.gfparticles : m->img.gparticles, f
+                    });
+        }
+    }
+}
+
 struct add_gestures_data {
     struct playerdata *pd;
 };
@@ -254,7 +268,11 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
     task_update(b->tasks);
     particle_update(b->particles);
 
+    int poof = 0;
+
     while (SDL_PollEvent(&m->e)) {
+        if (m->e.type == SDL_KEYDOWN && m->e.key.repeat) continue;
+
         switch (m->e.type) {
 
         case SDL_QUIT:
@@ -265,23 +283,23 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
             if (b->polling) {
                 switch (m->e.key.keysym.sym) {
 
-                case 'q': b->lhf |= 1 << GESTURE_STAB; b->lh = GESTURE_STAB; break;
-                case 'w': b->lhf |= 1 << GESTURE_W;    b->lh = GESTURE_W;    break;
-                case 'e': b->lhf |= 1 << GESTURE_C;    b->lh = GESTURE_C;    break;
-                case 'r': b->lhf |= 1 << GESTURE_P;    b->lh = GESTURE_P;    break;
-                case 'a': b->lhf |= 1 << GESTURE_NONE; b->lh = GESTURE_NONE; break;
-                case 's': b->lhf |= 1 << GESTURE_S;    b->lh = GESTURE_S;    break;
-                case 'd': b->lhf |= 1 << GESTURE_D;    b->lh = GESTURE_D;    break;
-                case 'f': b->lhf |= 1 << GESTURE_F;    b->lh = GESTURE_F;    break;
+                case 'q': b->lhf |= 1 << GESTURE_STAB; b->lh = GESTURE_STAB; poof |= 1; break;
+                case 'w': b->lhf |= 1 << GESTURE_W;    b->lh = GESTURE_W;    poof |= 1; break;
+                case 'e': b->lhf |= 1 << GESTURE_C;    b->lh = GESTURE_C;    poof |= 1; break;
+                case 'r': b->lhf |= 1 << GESTURE_P;    b->lh = GESTURE_P;    poof |= 1; break;
+                case 'a': b->lhf |= 1 << GESTURE_NONE; b->lh = GESTURE_NONE; poof |= 1; break;
+                case 's': b->lhf |= 1 << GESTURE_S;    b->lh = GESTURE_S;    poof |= 1; break;
+                case 'd': b->lhf |= 1 << GESTURE_D;    b->lh = GESTURE_D;    poof |= 1; break;
+                case 'f': b->lhf |= 1 << GESTURE_F;    b->lh = GESTURE_F;    poof |= 1; break;
 
-                case 'p': b->rhf |= 1 << GESTURE_STAB; b->rh = GESTURE_STAB; break;
-                case 'o': b->rhf |= 1 << GESTURE_W;    b->rh = GESTURE_W;    break;
-                case 'i': b->rhf |= 1 << GESTURE_C;    b->rh = GESTURE_C;    break;
-                case 'u': b->rhf |= 1 << GESTURE_P;    b->rh = GESTURE_P;    break;
-                case ';': b->rhf |= 1 << GESTURE_NONE; b->rh = GESTURE_NONE; break;
-                case 'l': b->rhf |= 1 << GESTURE_S;    b->rh = GESTURE_S;    break;
-                case 'k': b->rhf |= 1 << GESTURE_D;    b->rh = GESTURE_D;    break;
-                case 'j': b->rhf |= 1 << GESTURE_F;    b->rh = GESTURE_F;    break;
+                case 'p': b->rhf |= 1 << GESTURE_STAB; b->rh = GESTURE_STAB; poof |= 2; break;
+                case 'o': b->rhf |= 1 << GESTURE_W;    b->rh = GESTURE_W;    poof |= 2; break;
+                case 'i': b->rhf |= 1 << GESTURE_C;    b->rh = GESTURE_C;    poof |= 2; break;
+                case 'u': b->rhf |= 1 << GESTURE_P;    b->rh = GESTURE_P;    poof |= 2; break;
+                case ';': b->rhf |= 1 << GESTURE_NONE; b->rh = GESTURE_NONE; poof |= 2; break;
+                case 'l': b->rhf |= 1 << GESTURE_S;    b->rh = GESTURE_S;    poof |= 2; break;
+                case 'k': b->rhf |= 1 << GESTURE_D;    b->rh = GESTURE_D;    poof |= 2; break;
+                case 'j': b->rhf |= 1 << GESTURE_F;    b->rh = GESTURE_F;    poof |= 2; break;
 
                 case '.': if (b->page < m->nspells / SPELLS_PER_PAGE - 1) ++b->page; break;
                 case ',': if (b->page > 0) --b->page; break;
@@ -296,23 +314,23 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
             if (b->polling) {
                 switch (m->e.key.keysym.sym) {
 
-                case 'q': b->lhf &= ~(1 << GESTURE_STAB); break;
-                case 'w': b->lhf &= ~(1 << GESTURE_W);    break;
-                case 'e': b->lhf &= ~(1 << GESTURE_C);    break;
-                case 'r': b->lhf &= ~(1 << GESTURE_P);    break;
-                case 'a': b->lhf &= ~(1 << GESTURE_NONE); break;
-                case 's': b->lhf &= ~(1 << GESTURE_S);    break;
-                case 'd': b->lhf &= ~(1 << GESTURE_D);    break;
-                case 'f': b->lhf &= ~(1 << GESTURE_F);    break;
+                case 'q': b->lhf &= ~(1 << GESTURE_STAB); poof |= 4; break;
+                case 'w': b->lhf &= ~(1 << GESTURE_W);    poof |= 4; break;
+                case 'e': b->lhf &= ~(1 << GESTURE_C);    poof |= 4; break;
+                case 'r': b->lhf &= ~(1 << GESTURE_P);    poof |= 4; break;
+                case 'a': b->lhf &= ~(1 << GESTURE_NONE); poof |= 4; break;
+                case 's': b->lhf &= ~(1 << GESTURE_S);    poof |= 4; break;
+                case 'd': b->lhf &= ~(1 << GESTURE_D);    poof |= 4; break;
+                case 'f': b->lhf &= ~(1 << GESTURE_F);    poof |= 4; break;
 
-                case 'p': b->rhf &= ~(1 << GESTURE_STAB); break;
-                case 'o': b->rhf &= ~(1 << GESTURE_W);    break;
-                case 'i': b->rhf &= ~(1 << GESTURE_C);    break;
-                case 'u': b->rhf &= ~(1 << GESTURE_P);    break;
-                case ';': b->rhf &= ~(1 << GESTURE_NONE); break;
-                case 'l': b->rhf &= ~(1 << GESTURE_S);    break;
-                case 'k': b->rhf &= ~(1 << GESTURE_D);    break;
-                case 'j': b->rhf &= ~(1 << GESTURE_F);    break;
+                case 'p': b->rhf &= ~(1 << GESTURE_STAB); poof |= 8; break;
+                case 'o': b->rhf &= ~(1 << GESTURE_W);    poof |= 8; break;
+                case 'i': b->rhf &= ~(1 << GESTURE_C);    poof |= 8; break;
+                case 'u': b->rhf &= ~(1 << GESTURE_P);    poof |= 8; break;
+                case ';': b->rhf &= ~(1 << GESTURE_NONE); poof |= 8; break;
+                case 'l': b->rhf &= ~(1 << GESTURE_S);    poof |= 8; break;
+                case 'k': b->rhf &= ~(1 << GESTURE_D);    poof |= 8; break;
+                case 'j': b->rhf &= ~(1 << GESTURE_F);    poof |= 8; break;
 
                 }
             }
@@ -356,6 +374,12 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
             // next line
             ypos += m->spellnameh + 4;
         }
+
+        // draw poofy particles, if any
+        if (poof & 1) dopoof(m, b->particles, LH_POS(m), 0);
+        if (poof & 2) dopoof(m, b->particles, RH_POS(m), 0);
+        if ((poof & 4) && !b->lhf) dopoof(m, b->particles, LH_POS(m), 1);
+        if ((poof & 8) && !b->rhf) dopoof(m, b->particles, RH_POS(m), 1);
     }
 
     // draw wizards
@@ -368,7 +392,7 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
     ypos = drawgest(m, 5, ypos, b->p1.data) + STATUS_PAD;
     drawhpbar(m, SCREEN_WIDTH - 5, 5, 1, b->p2, -1);
 
-    // draw held gestures (TODO: positioning)
+    // draw held gestures
     if (b->lh != -1) anim(m, LH_POS(m), HAND_Y, b->lhf ? m->img.gesture : m->img.gesturefinal, b->lh);
     if (b->rh != -1) anim(m, RH_POS(m), HAND_Y, b->rhf ? m->img.gesture : m->img.gesturefinal, b->rh);
 

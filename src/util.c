@@ -120,3 +120,5 @@ int g2n(char ch) {
 
 double rd() { return (double)rand() / RAND_MAX; }
 double rd2(double a, double b) { return ((double)rand() / RAND_MAX)*(b-a) + a; }
+int ri1(int a) { return rand() % a; }
+int ri2(int a, int b) { return a + (rand() % (b - a + 1)); }
