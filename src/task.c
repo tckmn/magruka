@@ -53,7 +53,7 @@ struct task *task_seq(struct task *head, struct task *rest) {
 
 void task_update(struct task *task) {
     while ((task = task->next)) {
-        if ((*task->tf.func)(task->tf.data)) {
+        if ((*task->tf.func)(task->tf.m, task->tf.state, task->tf.data)) {
             free(task->tf.data);
             struct task *cb = task->callback;
             if (cb) {
@@ -100,7 +100,7 @@ struct set_int_data {
     int *dest, src;
 };
 
-int set_int_func(struct set_int_data *sid) {
+int set_int_func(void *_, void *__, struct set_int_data *sid) {
     *sid->dest = sid->src;
     return 1;
 }
@@ -109,5 +109,5 @@ struct taskfunc set_int(int *dest, int src) {
     struct set_int_data *sid = malloc(sizeof *sid);
     sid->dest = dest;
     sid->src = src;
-    return (struct taskfunc){set_int_func, sid};
+    return (struct taskfunc){set_int_func, 0, 0, sid};
 }

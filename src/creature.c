@@ -64,7 +64,7 @@ struct creature_animate_data {
     Uint32 speed, timer;
 };
 
-int creature_animate_func(struct creature_animate_data *cad) {
+int creature_animate_func(void *_, void *__, struct creature_animate_data *cad) {
     Uint32 now = SDL_GetTicks();
     if (SDL_TICKS_PASSED(now, cad->timer + cad->speed)) {
         if (cad->c->frame == cad->endframe) return 1;
@@ -81,5 +81,5 @@ struct taskfunc creature_animate(struct creature *c, int delta, int endframe, Ui
     cad->endframe = endframe;
     cad->speed = speed;
     cad->timer = SDL_GetTicks();
-    return (struct taskfunc){creature_animate_func, cad};
+    return (struct taskfunc){creature_animate_func, 0, 0, cad};
 }

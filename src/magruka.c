@@ -70,6 +70,7 @@ int load_assets(struct magruka *m) {
     m->img.healthend    = R1(55, 127, 1,  15);
     m->img.healthcapr   = R1(56, 127, 2,  15);
     m->img.healthcapl   = R1(57, 127, 2,  15);
+    m->img.c_particles  = R1(0,  143, 11, 11);
     m->img.key          = R2(0,  0,   9,  9);
     m->img.keytop       = R2(0,  0,   9,  5);
     m->img.keybot       = R2(0,  4,   9,  5);
@@ -121,14 +122,14 @@ int load_assets(struct magruka *m) {
     for (;;) {
         // read name
         pos = 0;
-        while (ch = getc(f)) {
+        while ((ch = getc(f))) {
             if (ch == EOF) goto done;
             m->spells[m->nspells].name[pos++] = ch;
         }
         m->spells[m->nspells].name[pos] = 0;
         // read gestures
         pos = 0;
-        while (ch = getc(f)) m->spells[m->nspells].gesture[pos++] = g2n(ch);
+        while ((ch = getc(f))) m->spells[m->nspells].gesture[pos++] = g2n(ch);
         m->spells[m->nspells].gesture[pos] = SPELL_END;
         // read damage
         m->spells[m->nspells].damage = getc(f) - 0x80;

@@ -117,3 +117,6 @@ int g2n(char ch) {
     }
     return 0;
 }
+
+double rd() { return (double)rand() / RAND_MAX; }
+double rd2(double a, double b) { return ((double)rand() / RAND_MAX)*(b-a) + a; }

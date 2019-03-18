@@ -20,7 +20,9 @@
 #define __TASK_H__
 
 struct taskfunc {
-    int (*func)(void*);
+    int (*func)(void*, void*, void*);
+    void *m;
+    void *state;
     void *data;
 };
 

@@ -51,10 +51,10 @@ void particle_update(struct particle *p) {
 
 void particle_draw(struct magruka *m, struct particle *p) {
     while ((p = p->next)) {
-        alph(m, p->d.a);
+        alph(m, p->d.a*0xff);
         anim(m, p->d.x, p->d.y, p->d.img, p->d.frame);
     }
-    alph(m, 1);
+    alph(m, 0xff);
 }
 
 void particle_destroy(struct particle *p) {

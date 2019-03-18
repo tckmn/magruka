@@ -30,5 +30,7 @@ void write(struct magruka*, int, int, char*);
 struct textimg gentext(struct magruka*, char*, SDL_Color);
 void drawtext(struct magruka*, int, int, struct textimg);
 int g2n(char);
+double rd();
+double rd2(double, double);
 
 #endif

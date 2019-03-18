@@ -30,6 +30,10 @@
 #define SPELLS_PER_PAGE 21
 #define STATUS_PAD 10
 
+#define LH_POS(m) (SCREEN_WIDTH/2 - (m)->spellnamew - (m)->img.gesture.w - 20)
+#define RH_POS(m) (SCREEN_WIDTH/2 + (m)->spellnamew + 20)
+#define HAND_Y    200
+
 #define GESTURE_DURATION 800
 
 #define FLOOR_POS ((SCREEN_HEIGHT)*7/8)
@@ -84,6 +88,7 @@ struct magruka {
         SDL_Rect wall, floor, floortop;
         SDL_Rect gesture, gesturefinal;
         SDL_Rect healthcirc, healthbar, healthend, healthcapr, healthcapl;
+        SDL_Rect c_particles;
         SDL_Rect key, keytop, keybot, keyall, keyboth;
         SDL_Rect handind;
         SDL_Point letters;

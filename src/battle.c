@@ -75,18 +75,36 @@ int drawgest(struct magruka *m, int x, int y, struct playerdata *p) {
     return y2 + m->img.handind.h;
 }
 
+void explode_c(struct magruka *m, struct particle *particles, int xpos) {
+    particle_add(particles, (struct particledata){xpos + SCALE1*15, HAND_Y - SCALE1*1,  1, rd2(-2,2), rd2(-2,0), -0.01, 0, 0.1, 0, m->img.c_particles, 0});
+    particle_add(particles, (struct particledata){xpos + SCALE1*9,  HAND_Y + SCALE1*0,  1, rd2(-2,2), rd2(-2,0), -0.01, 0, 0.1, 0, m->img.c_particles, 1});
+    particle_add(particles, (struct particledata){xpos + SCALE1*4,  HAND_Y + SCALE1*2,  1, rd2(-2,2), rd2(-2,0), -0.01, 0, 0.1, 0, m->img.c_particles, 2});
+    particle_add(particles, (struct particledata){xpos + SCALE1*1,  HAND_Y + SCALE1*6,  1, rd2(-2,2), rd2(-2,0), -0.01, 0, 0.1, 0, m->img.c_particles, 3});
+    particle_add(particles, (struct particledata){xpos + SCALE1*1,  HAND_Y + SCALE1*11, 1, rd2(-2,2), rd2(-2,0), -0.01, 0, 0.1, 0, m->img.c_particles, 4});
+    particle_add(particles, (struct particledata){xpos + SCALE1*1,  HAND_Y + SCALE1*19, 1, rd2(-2,2), rd2(-2,0), -0.01, 0, 0.1, 0, m->img.c_particles, 5});
+    particle_add(particles, (struct particledata){xpos + SCALE1*5,  HAND_Y + SCALE1*22, 1, rd2(-2,2), rd2(-2,0), -0.01, 0, 0.1, 0, m->img.c_particles, 6});
+    particle_add(particles, (struct particledata){xpos + SCALE1*12, HAND_Y + SCALE1*21, 1, rd2(-2,2), rd2(-2,0), -0.01, 0, 0.1, 0, m->img.c_particles, 7});
+    particle_add(particles, (struct particledata){xpos + SCALE1*16, HAND_Y + SCALE1*19, 1, rd2(-2,2), rd2(-2,0), -0.01, 0, 0.1, 0, m->img.c_particles, 8});
+}
+
 struct add_gestures_data {
     struct playerdata *pd;
-    int lh, rh, n;
+    int n;
 };
 
-int add_gestures_func(struct add_gestures_data *agd) {
+int add_gestures_func(struct magruka *m, struct battlestate *b, struct add_gestures_data *agd) {
     if (agd->pd->timer == 0) {
         agd->pd->timer = SDL_GetTicks();
-        agd->pd->lh[agd->n] = agd->lh;
-        agd->pd->rh[agd->n] = agd->rh;
+        agd->pd->lh[agd->n] = b->lh;
+        agd->pd->rh[agd->n] = b->rh;
         agd->pd->lh[agd->n+1] = SPELL_END;
         agd->pd->rh[agd->n+1] = SPELL_END;
+
+        const int L = LH_POS(m), R = RH_POS(m);
+        explode_c(m, b->particles, L);
+        explode_c(m, b->particles, R);
+
+        b->lh = -1; b->rh = -1;
     } else if (SDL_TICKS_PASSED(SDL_GetTicks(), agd->pd->timer + GESTURE_DURATION)) {
         agd->pd->timer = 0;
         return 1;
@@ -94,15 +112,13 @@ int add_gestures_func(struct add_gestures_data *agd) {
     return 0;
 }
 
-struct taskfunc add_gestures(struct playerdata *pd, int lh, int rh) {
+struct taskfunc add_gestures(struct magruka *m, struct battlestate *b, struct playerdata *pd) {
     struct add_gestures_data *agd = malloc(sizeof *agd);
     agd->pd = pd;
-    agd->lh = lh;
-    agd->rh = rh;
     int n = 0;
     for (int *lg = pd->lh; *lg != SPELL_END; ++lg) ++n;
     agd->n = n;
-    return (struct taskfunc){add_gestures_func, agd};
+    return (struct taskfunc){add_gestures_func, m, b, agd};
 }
 
 struct battlestate *battle_init(struct magruka *m) {
@@ -254,20 +270,21 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
     drawhpbar(m, SCREEN_WIDTH - 5, 5, 1, b->p2, -1);
 
     // draw held gestures (TODO: positioning)
-    if (b->lh != -1) anim(m, SCREEN_WIDTH/2 - m->spellnamew - m->img.gesture.w - 20, 200, b->lhf ? m->img.gesture : m->img.gesturefinal, b->lh);
-    if (b->rh != -1) anim(m, SCREEN_WIDTH/2 + m->spellnamew + 20, 200, b->rhf ? m->img.gesture : m->img.gesturefinal, b->rh);
+    if (b->lh != -1) anim(m, LH_POS(m), HAND_Y, b->lhf ? m->img.gesture : m->img.gesturefinal, b->lh);
+    if (b->rh != -1) anim(m, RH_POS(m), HAND_Y, b->rhf ? m->img.gesture : m->img.gesturefinal, b->rh);
+
+    // draw particles
+    particle_draw(m, b->particles);
 
     // check for finalized turn
     if (b->polling && b->lh != -1 && b->rh != -1 && !b->lhf && !b->rhf) {
         b->polling = 0;
         task_add(b->tasks,
                 creature_animate(&b->p1, 1, 3, 100), task_callback(
-                add_gestures(b->p1.data, b->lh, b->rh), task_callback(
-                creature_animate(&b->p1, -1, 0, 100),
-                    task_seq(task_callback(set_int(&b->rh, -1), 0),
-                    task_seq(task_callback(set_int(&b->lh, -1), 0),
-                             task_callback(set_int(&b->polling, 1), 0)))
-                )));
+                add_gestures(m, b, b->p1.data), task_callback(
+                creature_animate(&b->p1, -1, 0, 100), task_callback(
+                set_int(&b->polling, 1), 0
+                ))));
     }
 
     // render everything
