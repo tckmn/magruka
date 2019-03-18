@@ -60,18 +60,27 @@ int drawgest(struct magruka *m, int x, int y, struct playerdata *p) {
     anim(m, x + m->img.handind.w/2, y2, m->img.handind, 0);
 
     int xpos = x + m->img.handind.w*2;
-    for (int *lg = p->lh, *rg = p->rh; *lg != SPELL_END; ++lg, ++rg) {
-        if (p->timer != 0 && lg[1] == SPELL_END) {
-            int diff = SDL_GetTicks() - p->timer;
-            if (diff > GESTURE_DURATION) diff = GESTURE_DURATION;
+    // for animations
+    int diff = SDL_GetTicks() - p->timer;
+    if (diff > GESTURE_DURATION) diff = GESTURE_DURATION;
+
+    // slide all gestures out if we've reached the cap
+    if (p->timer && p->n > SPELL_BUF) {
+        xpos -= diff * (m->img.key.w + DRAWGEST_PAD) / GESTURE_DURATION;
+        alph(m, 0xff - diff * 0xff / GESTURE_DURATION);
+    }
+
+    for (int i = 0; i < p->n; ++i) {
+        if (p->timer && i + 1 == p->n) {
             xpos += DRAWGEST_LEN - diff * DRAWGEST_LEN / GESTURE_DURATION;
             alph(m, diff * 0xff / GESTURE_DURATION);
         }
-        anim(m, xpos, y1, m->img.key, *lg);
-        anim(m, xpos, y2, m->img.key, *rg);
+        anim(m, xpos, y1, m->img.key, p->lh[i]);
+        anim(m, xpos, y2, m->img.key, p->rh[i]);
         xpos += m->img.key.w + DRAWGEST_PAD;
+        if (p->timer && !i) alph(m, 0xff);
     }
-    if (p->timer != 0) alph(m, 0xff);
+    if (p->timer) alph(m, 0xff);
 
     return y2 + m->img.handind.h;
 }
@@ -178,16 +187,14 @@ void explode(struct magruka *m, struct particle *particles, int xpos, int g) {
 
 struct add_gestures_data {
     struct playerdata *pd;
-    int n;
 };
 
 int add_gestures_func(struct magruka *m, struct battlestate *b, struct add_gestures_data *agd) {
     if (agd->pd->timer == 0) {
         agd->pd->timer = SDL_GetTicks();
-        agd->pd->lh[agd->n] = b->lh;
-        agd->pd->rh[agd->n] = b->rh;
-        agd->pd->lh[agd->n+1] = SPELL_END;
-        agd->pd->rh[agd->n+1] = SPELL_END;
+        agd->pd->lh[agd->pd->n] = b->lh;
+        agd->pd->rh[agd->pd->n] = b->rh;
+        ++agd->pd->n;
 
         explode(m, b->particles, LH_POS(m), b->lh);
         explode(m, b->particles, RH_POS(m), b->rh);
@@ -195,6 +202,13 @@ int add_gestures_func(struct magruka *m, struct battlestate *b, struct add_gestu
         b->lh = -1; b->rh = -1;
     } else if (SDL_TICKS_PASSED(SDL_GetTicks(), agd->pd->timer + GESTURE_DURATION)) {
         agd->pd->timer = 0;
+        if (agd->pd->n > SPELL_BUF) {
+            --agd->pd->n;
+            for (int i = 0; i < SPELL_BUF; ++i) {
+                agd->pd->lh[i] = agd->pd->lh[i+1];
+                agd->pd->rh[i] = agd->pd->rh[i+1];
+            }
+        }
         return 1;
     }
     return 0;
@@ -203,9 +217,6 @@ int add_gestures_func(struct magruka *m, struct battlestate *b, struct add_gestu
 struct taskfunc add_gestures(struct magruka *m, struct battlestate *b, struct playerdata *pd) {
     struct add_gestures_data *agd = malloc(sizeof *agd);
     agd->pd = pd;
-    int n = 0;
-    for (int *lg = pd->lh; *lg != SPELL_END; ++lg) ++n;
-    agd->n = n;
     return (struct taskfunc){add_gestures_func, m, b, agd};
 }
 
@@ -223,7 +234,7 @@ struct battlestate *battle_init(struct magruka *m) {
     creature_init(m, &b->p2, "Player 2", 15);
     struct playerdata *pd1 = malloc(sizeof *pd1),
                       *pd2 = malloc(sizeof *pd2);
-    pd1->lh[0] = pd1->rh[0] = pd2->lh[0] = pd2->rh[0] = SPELL_END;
+    pd1->n = pd2->n = 0;
     pd1->timer = pd2->timer = 0;
     b->p1.data = pd1;
     b->p2.data = pd2;

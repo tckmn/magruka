@@ -46,6 +46,8 @@
 #define P2(x,y)      ((SDL_Point){(x)*SCALE2,HEIGHT1+(y)*SCALE2})
 #define R2(x,y,w,h)  ((SDL_Rect){(x)*SCALE2,HEIGHT1+(y)*SCALE2,(w)*SCALE2,(h)*SCALE2})
 
+#define SPELL_BUF 8
+
 #define GESTURE_C    0
 #define GESTURE_D    1
 #define GESTURE_F    2

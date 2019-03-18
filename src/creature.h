@@ -25,7 +25,8 @@
 #define MAX_NAME_LEN 50
 
 struct playerdata {
-    int lh[10], rh[10];
+    int lh[SPELL_BUF+1], rh[SPELL_BUF+1];
+    int n;
     Uint32 timer;
 };
 
