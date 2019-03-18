@@ -136,6 +136,16 @@ void explode_s(struct magruka *m, struct particle *particles, int xpos) {
     particle_add(particles, (struct particledata){xpos + SCALE1*2,  HAND_Y + SCALE1*21, EXPLODE_PARAMS, m->img.s_particles, 9});
 }
 void explode_w(struct magruka *m, struct particle *particles, int xpos) {
+    particle_add(particles, (struct particledata){xpos - SCALE1*1,  HAND_Y + SCALE1*0,  EXPLODE_PARAMS, m->img.w_particles, 0});
+    particle_add(particles, (struct particledata){xpos - SCALE1*1,  HAND_Y + SCALE1*8,  EXPLODE_PARAMS, m->img.w_particles, 1});
+    particle_add(particles, (struct particledata){xpos + SCALE1*0,  HAND_Y + SCALE1*14, EXPLODE_PARAMS, m->img.w_particles, 2});
+    particle_add(particles, (struct particledata){xpos + SCALE1*4,  HAND_Y + SCALE1*20, EXPLODE_PARAMS, m->img.w_particles, 3});
+    particle_add(particles, (struct particledata){xpos + SCALE1*8,  HAND_Y + SCALE1*10, EXPLODE_PARAMS, m->img.w_particles, 4});
+    particle_add(particles, (struct particledata){xpos + SCALE1*9,  HAND_Y + SCALE1*18, EXPLODE_PARAMS, m->img.w_particles, 5});
+    particle_add(particles, (struct particledata){xpos + SCALE1*15, HAND_Y + SCALE1*20, EXPLODE_PARAMS, m->img.w_particles, 6});
+    particle_add(particles, (struct particledata){xpos + SCALE1*17, HAND_Y + SCALE1*13, EXPLODE_PARAMS, m->img.w_particles, 7});
+    particle_add(particles, (struct particledata){xpos + SCALE1*17, HAND_Y + SCALE1*6,  EXPLODE_PARAMS, m->img.w_particles, 8});
+    particle_add(particles, (struct particledata){xpos + SCALE1*17, HAND_Y + SCALE1*1,  EXPLODE_PARAMS, m->img.w_particles, 9});
 }
 
 struct add_gestures_data {
