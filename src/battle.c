@@ -53,13 +53,14 @@ int drawhpbar(struct magruka *m, int x, int y, int flip, struct creature c, doub
 int drawgest(struct magruka *m, int x, int y, struct playerdata *p) {
     int y1 = y, y2 = y + m->img.handind.h + 4;
 
-    anim(m, x, y1, m->img.handind, 1);
-    anim(m, x, y2, m->img.handind, 0);
+    anim(m, x + m->img.handind.w/2, y1, m->img.handind, 1);
+    anim(m, x + m->img.handind.w/2, y2, m->img.handind, 0);
 
     int xpos = x + m->img.handind.w*2;
     for (int *lg = p->lh, *rg = p->rh; *lg != SPELL_END; ++lg, ++rg) {
         anim(m, xpos, y1, m->img.key, *lg);
         anim(m, xpos, y2, m->img.key, *rg);
+        xpos += m->img.key.w + 4;
     }
 
     return y2 + m->img.handind.h;
@@ -255,8 +256,7 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
                 creature_animate(&b->p1, -1, 0, 100),
                     task_seq(task_callback(set_int(&b->rh, -1), 0),
                     task_seq(task_callback(set_int(&b->lh, -1), 0),
-                             task_callback(set_int(&b->polling, 1), 0)
-                    ))
+                             task_callback(set_int(&b->polling, 1), 0)))
                 )));
     }
 
