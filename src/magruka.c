@@ -137,9 +137,10 @@ int load_assets(struct magruka *m) {
         }
         m->spells[m->nspells].name[pos] = 0;
         // read gestures
-        pos = 0;
-        while ((ch = getc(f))) m->spells[m->nspells].gesture[pos++] = g2n(ch);
-        m->spells[m->nspells].gesture[pos] = SPELL_END;
+        m->spells[m->nspells].ngest = 0;
+        while ((ch = getc(f))) {
+            m->spells[m->nspells].gesture[m->spells[m->nspells].ngest++] = g2n(ch);
+        }
         // read damage
         m->spells[m->nspells].damage = getc(f) - 0x80;
         // discard newline

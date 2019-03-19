@@ -56,7 +56,6 @@
 #define GESTURE_W    5
 #define GESTURE_STAB 6
 #define GESTURE_NONE 7
-#define SPELL_END    8
 
 #define STATE_BATTLE 1
 
@@ -73,7 +72,8 @@ struct textimg {
 struct spell {
     char name[30];
     struct textimg nameimg;
-    int gesture[9];
+    int gesture[8];
+    int ngest;
     int damage;
 };
 

@@ -22,12 +22,15 @@
 #include "magruka.h"
 #include "creature.h"
 
+#define CURRENT_PLAYER(b) ((b)->turn == 1 ? b->p1 : b->p2)
+
 struct battlestate {
     struct task *tasks;
     struct particle *particles;
     int lh, rh, lhf, rhf;
     int page;
     struct creature p1, p2;
+    int turn;
     int polling;
 };
 
