@@ -116,6 +116,10 @@ int load_assets(struct magruka *m) {
         m->img.letterx[i] = x;
     }
 
+    // TODO free these and spell texts on destroy
+    m->text.lefthand = gentext(m, "left hand", COLOR_LIGHTBLUE);
+    m->text.righthand = gentext(m, "right hand", COLOR_LIGHTBLUE);
+
     // data file format is as follows:
     //  * name followed by NUL
     //  * gestures followed by NUL

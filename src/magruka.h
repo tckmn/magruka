@@ -62,6 +62,7 @@
 static const SDL_Color COLOR_WHITE = {0xff, 0xff, 0xff, 0xff};
 static const SDL_Color COLOR_HPTEXT = {0xd4, 0x75, 0x8d, 0xff};
 static const SDL_Color COLOR_HPBAR = {0xa9, 0x1f, 0x42, 0xff};
+static const SDL_Color COLOR_LIGHTBLUE = {0x7b, 0x83, 0xff, 0xff};
 
 struct textimg {
     SDL_Texture *texture;
@@ -100,6 +101,9 @@ struct magruka {
         int letterh;
         int letterx[62];
     } img;
+    struct {
+        struct textimg lefthand, righthand;
+    } text;
     struct spell *spells;
     int nspells;
     int spellnamew;

@@ -92,10 +92,11 @@ void drawformula(struct magruka *m, int xpos, int ypos, struct spell *sp) {
     }
 }
 
-void drawlist(struct magruka *m, int xpos, int ypos, struct spell **s, int a) {
+void drawlist(struct magruka *m, int xpos, int ypos, struct spell **s, int a, struct textimg label) {
     for (int i = 0; *s; ++s, ++i) {
         if (i == a) {
-            draw(m, xpos, ypos, m->img.spellchoose);
+            draw(m, xpos - SCALE1*3, ypos - SCALE1*3, m->img.spellchoose);
+            drawtext(m, xpos - SCALE1, ypos - SCALE1*3 - label.h/2, label);
         }
         drawtext(m, xpos, ypos, (*s)->nameimg);
         ypos += m->spellnameh + 4;
@@ -424,8 +425,8 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
     } else if (b->casting) {
         // draw possible spell list
         struct playerdata *pd = CPD(b);
-        drawlist(m, SCREEN_WIDTH/2 - m->spellnamew - SPELL_LIST_PAD, 70, pd->lhs, pd->lha);
-        drawlist(m, SCREEN_WIDTH/2 + SPELL_LIST_PAD, 70, pd->rhs, pd->rha);
+        drawlist(m, SCREEN_WIDTH/2 - m->spellnamew - SPELL_LIST_PAD, 70, pd->lhs, pd->lha, m->text.lefthand);
+        drawlist(m, SCREEN_WIDTH/2 + SPELL_LIST_PAD,                 70, pd->rhs, pd->rha, m->text.righthand);
     }
 
     // draw wizards
