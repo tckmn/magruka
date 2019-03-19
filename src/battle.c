@@ -92,7 +92,15 @@ void drawformula(struct magruka *m, int xpos, int ypos, struct spell *sp) {
     }
 }
 
-void drawlist(struct magruka *m, int xpos, int ypos, struct spell **s, int a, struct textimg label) {
+#define TARGET_Y 420
+void drawlist(struct magruka *m, struct battlestate *b, int xpos, int ypos, struct spell **s, int a, int t, struct textimg label) {
+    if (*s) {
+        draw(m, xpos - SCALE1*3, TARGET_Y - SCALE1*3, m->img.targetchoose);
+        drawtext(m, xpos - SCALE1, TARGET_Y - SCALE1*3 - m->text.target.h/2, m->text.target);
+        struct creature c = t == 0 ? OP(b) : t == 1 ? CP(b) : b->mons[t-2];
+        drawtext(m, xpos, TARGET_Y, c.nameimg);
+    }
+
     for (int i = 0; *s; ++s, ++i) {
         if (i == a) {
             draw(m, xpos - SCALE1*3, ypos - SCALE1*3, m->img.spellchoose);
@@ -260,6 +268,8 @@ int add_gestures_func(struct magruka *m, struct battlestate *b, void *_) {
         }
         pd->lhs[lc] = pd->rhs[rc] = 0;
         pd->lha = pd->lhb = pd->rha = pd->rhb = 0;
+        if (lc) pd->lht = !pd->lhs[0]->offensive;
+        if (rc) pd->rht = !pd->rhs[0]->offensive;
         b->casting = 1;
         return 1;
     }
@@ -295,6 +305,9 @@ struct battlestate *battle_init(struct magruka *m) {
     b->p2.x = SCREEN_WIDTH - 100 - b->p2.img.w; b->p2.y = FLOOR_POS - b->p2.img.h;
     b->p1.frame = b->p2.frame = 0;
     b->p1.flip = 0; b->p2.flip = 1;
+
+    b->mons = 0;
+    b->nmons = 0;
 
     b->turn = 1;
     b->polling = 1;
@@ -350,10 +363,15 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
                 struct playerdata *pd = CPD(b);
                 switch (m->e.key.keysym.sym) {
 
-                case 'r': if (pd->lha > 0)        { pd->lhb = pd->lha--; } break;
-                case 'f': if (pd->lhs[pd->lha+1]) { pd->lhb = pd->lha++; } break;
-                case 'u': if (pd->rha > 0)        { pd->rhb = pd->rha--; } break;
-                case 'j': if (pd->rhs[pd->rha+1]) { pd->rhb = pd->rha++; } break;
+                case 'r': if (pd->lha > 0)        { pd->lhb = pd->lha--; pd->lht = !pd->lhs[pd->lha]->offensive; } break;
+                case 'f': if (pd->lhs[pd->lha+1]) { pd->lhb = pd->lha++; pd->lht = !pd->lhs[pd->lha]->offensive; } break;
+                case 'u': if (pd->rha > 0)        { pd->rhb = pd->rha--; pd->rht = !pd->rhs[pd->rha]->offensive; } break;
+                case 'j': if (pd->rhs[pd->rha+1]) { pd->rhb = pd->rha++; pd->rht = !pd->rhs[pd->rha]->offensive; } break;
+
+                case 's': if (pd->lht > 0)            --pd->lht; break;
+                case 'd': if (pd->lht < b->nmons + 1) ++pd->lht; break;
+                case 'k': if (pd->rht > 0)            --pd->rht; break;
+                case 'l': if (pd->rht < b->nmons + 1) ++pd->rht; break;
 
                 }
             }
@@ -425,8 +443,8 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
     } else if (b->casting) {
         // draw possible spell list
         struct playerdata *pd = CPD(b);
-        drawlist(m, SCREEN_WIDTH/2 - m->spellnamew - SPELL_LIST_PAD, 70, pd->lhs, pd->lha, m->text.lefthand);
-        drawlist(m, SCREEN_WIDTH/2 + SPELL_LIST_PAD,                 70, pd->rhs, pd->rha, m->text.righthand);
+        drawlist(m, b, SCREEN_WIDTH/2 - m->spellnamew - SPELL_LIST_PAD, 70, pd->lhs, pd->lha, pd->lht, m->text.lefthand);
+        drawlist(m, b, SCREEN_WIDTH/2 + SPELL_LIST_PAD,                 70, pd->rhs, pd->rha, pd->rht, m->text.righthand);
     }
 
     // draw wizards

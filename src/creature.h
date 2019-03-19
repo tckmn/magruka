@@ -26,10 +26,15 @@
 #define MAX_SPELL_COUNT 4
 
 struct playerdata {
+    // gesture history
     int lh[SPELL_BUF+1], rh[SPELL_BUF+1];
     int n;
+    // castable spells
     struct spell *lhs[MAX_SPELL_COUNT+1], *rhs[MAX_SPELL_COUNT+1];
+    // index of currently and previously selected spell (in lhs/rhs)
     int lha, lhb, rha, rhb;
+    // target (0 = opponent, 1 = self, 2+ = index into b->mons)
+    int lht, rht;
     Uint32 timer;
 };
 

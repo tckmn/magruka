@@ -22,8 +22,11 @@
 #include "magruka.h"
 #include "creature.h"
 
-#define CURRENT_PLAYER(b) ((b)->turn == 1 ? b->p1 : b->p2)
-#define CPD(b) ((struct playerdata*)(CURRENT_PLAYER(b).data))
+// current and other player
+#define CP(b) ((b)->turn == 1 ? (b)->p1 : (b)->p2)
+#define CPD(b) ((struct playerdata*)(CP(b).data))
+#define OP(b) ((b)->turn == 1 ? (b)->p2 : (b)->p1)
+#define OPD(b) ((struct playerdata*)(OP(b).data))
 
 struct battlestate {
     struct task *tasks;
@@ -31,6 +34,8 @@ struct battlestate {
     int lh, rh, lhf, rhf;
     int page;
     struct creature p1, p2;
+    struct creature *mons;
+    int nmons;
     int turn;
     int polling, casting;
 };

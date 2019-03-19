@@ -70,7 +70,8 @@ int load_assets(struct magruka *m) {
     m->img.healthend      = R1(55,  127, 1,  15);
     m->img.healthcapr     = R1(56,  127, 2,  15);
     m->img.healthcapl     = R1(57,  127, 2,  15);
-    m->img.spellchoose    = R1(0,   191, 50, 50);
+    m->img.spellchoose    = R1(0,   191, 50, 15);
+    m->img.targetchoose   = R1(0,   206, 50, 50);
     m->img.c_particles    = R1(0,   142, 11, 11);
     m->img.d_particles    = R1(110, 142, 11, 11);
     m->img.f_particles    = R1(0,   153, 11, 11);
@@ -119,6 +120,7 @@ int load_assets(struct magruka *m) {
     // TODO free these and spell texts on destroy
     m->text.lefthand = gentext(m, "left hand", COLOR_LIGHTBLUE);
     m->text.righthand = gentext(m, "right hand", COLOR_LIGHTBLUE);
+    m->text.target = gentext(m, "target", COLOR_LIGHTBROWN);
 
     // data file format is as follows:
     //  * name followed by NUL
@@ -146,6 +148,8 @@ int load_assets(struct magruka *m) {
         while ((ch = getc(f))) {
             m->spells[m->nspells].gesture[m->spells[m->nspells].ngest++] = g2n(ch);
         }
+        // read offensive type
+        m->spells[m->nspells].offensive = getc(f);
         // read damage
         m->spells[m->nspells].damage = getc(f) - 0x80;
         // discard newline

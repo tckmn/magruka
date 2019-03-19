@@ -63,6 +63,7 @@ static const SDL_Color COLOR_WHITE = {0xff, 0xff, 0xff, 0xff};
 static const SDL_Color COLOR_HPTEXT = {0xd4, 0x75, 0x8d, 0xff};
 static const SDL_Color COLOR_HPBAR = {0xa9, 0x1f, 0x42, 0xff};
 static const SDL_Color COLOR_LIGHTBLUE = {0x7b, 0x83, 0xff, 0xff};
+static const SDL_Color COLOR_LIGHTBROWN = {0xdf, 0xb1, 0xa8, 0xff};
 
 struct textimg {
     SDL_Texture *texture;
@@ -75,6 +76,7 @@ struct spell {
     struct textimg nameimg;
     int gesture[8];
     int ngest;
+    int offensive;  // 0 = defensive, 1 = offensive, 2 = global effect
     int damage;
 };
 
@@ -91,7 +93,7 @@ struct magruka {
         SDL_Rect wall, floor, floortop;
         SDL_Rect gesture, gesturefinal;
         SDL_Rect healthcirc, healthbar, healthend, healthcapr, healthcapl;
-        SDL_Rect spellchoose;
+        SDL_Rect spellchoose, targetchoose;
         SDL_Rect c_particles, d_particles, f_particles, p_particles, s_particles, w_particles, stab_particles, none_particles;
         SDL_Rect gparticles, gfparticles;
         SDL_Rect key, keytop, keybot, keyall, keyboth;
@@ -102,7 +104,7 @@ struct magruka {
         int letterx[62];
     } img;
     struct {
-        struct textimg lefthand, righthand;
+        struct textimg lefthand, righthand, target;
     } text;
     struct spell *spells;
     int nspells;
