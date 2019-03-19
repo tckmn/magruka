@@ -23,10 +23,13 @@
 #include "task.h"
 
 #define MAX_NAME_LEN 50
+#define MAX_SPELL_COUNT 4
 
 struct playerdata {
     int lh[SPELL_BUF+1], rh[SPELL_BUF+1];
     int n;
+    struct spell *lhs[MAX_SPELL_COUNT+1], *rhs[MAX_SPELL_COUNT+1];
+    int lha, lhb, rha, rhb;
     Uint32 timer;
 };
 

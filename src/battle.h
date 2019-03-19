@@ -23,6 +23,7 @@
 #include "creature.h"
 
 #define CURRENT_PLAYER(b) ((b)->turn == 1 ? b->p1 : b->p2)
+#define CPD(b) ((struct playerdata*)(CURRENT_PLAYER(b).data))
 
 struct battlestate {
     struct task *tasks;
@@ -31,7 +32,7 @@ struct battlestate {
     int page;
     struct creature p1, p2;
     int turn;
-    int polling;
+    int polling, casting;
 };
 
 struct battlestate *battle_init(struct magruka*);

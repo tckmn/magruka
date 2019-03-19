@@ -70,6 +70,7 @@ int load_assets(struct magruka *m) {
     m->img.healthend      = R1(55,  127, 1,  15);
     m->img.healthcapr     = R1(56,  127, 2,  15);
     m->img.healthcapl     = R1(57,  127, 2,  15);
+    m->img.spellchoose    = R1(0,   191, 50, 50);
     m->img.c_particles    = R1(0,   142, 11, 11);
     m->img.d_particles    = R1(110, 142, 11, 11);
     m->img.f_particles    = R1(0,   153, 11, 11);

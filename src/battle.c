@@ -85,6 +85,25 @@ int drawgest(struct magruka *m, int x, int y, struct playerdata *p) {
     return y2 + m->img.handind.h;
 }
 
+void drawformula(struct magruka *m, int xpos, int ypos, struct spell *sp) {
+    for (int i = 0; i < sp->ngest; ++i) {
+        anim(m, xpos, ypos, sp->gesture[i] > 0 ? m->img.key : m->img.keyboth, abs(sp->gesture[i]));
+        xpos += m->img.key.w + 2;
+    }
+}
+
+void drawlist(struct magruka *m, int xpos, int ypos, struct spell **s, int a) {
+    for (int i = 0; *s; ++s, ++i) {
+        if (i == a) {
+            draw(m, xpos, ypos, m->img.spellchoose);
+        }
+        drawtext(m, xpos, ypos, (*s)->nameimg);
+        ypos += m->spellnameh + 4;
+        drawformula(m, xpos, ypos, *s);
+        ypos += 3*m->spellnameh + 4;
+    }
+}
+
 #define EXPLODE_PARAMS 1, 0, rd2(-2,2), rd2(-3,0), -0.01, rd2(-0.01,0.01), 0, 0.1, 0, 0
 void explode_c(struct magruka *m, struct particle *particles, int xpos) {
     particle_add(particles, (struct particledata){xpos + SCALE1*15, HAND_Y - SCALE1*1,  EXPLODE_PARAMS, m->img.c_particles, 0});
@@ -201,7 +220,7 @@ void dopoof(struct magruka *m, struct particle *particles, int xpos, int finaliz
 }
 
 int add_gestures_func(struct magruka *m, struct battlestate *b, void *_) {
-    struct playerdata *pd = CURRENT_PLAYER(b).data;
+    struct playerdata *pd = CPD(b);
     if (pd->timer == 0) {
         pd->timer = SDL_GetTicks();
         pd->lh[pd->n] = b->lh;
@@ -221,6 +240,26 @@ int add_gestures_func(struct magruka *m, struct battlestate *b, void *_) {
                 pd->rh[i] = pd->rh[i+1];
             }
         }
+        int lc = 0, rc = 0;
+        for (int i = 0; i < m->nspells; ++i) {
+            struct spell *s = m->spells + i;
+            if (s->ngest > pd->n) continue;
+            int lm = 1, rm = 1; // does spell match
+            for (int j = 1; j <= s->ngest; ++j) {
+                const int g = s->gesture[s->ngest-j];
+                if (g < 0) {
+                    if (-g != pd->lh[pd->n-j] || -g != pd->rh[pd->n-j]) lm = rm = 0;
+                } else {
+                    if (g != pd->lh[pd->n-j]) lm = 0;
+                    if (g != pd->rh[pd->n-j]) rm = 0;
+                }
+            }
+            if (lm) pd->lhs[lc++] = s;
+            if (rm) pd->rhs[rc++] = s;
+        }
+        pd->lhs[lc] = pd->rhs[rc] = 0;
+        pd->lha = pd->lhb = pd->rha = pd->rhb = 0;
+        b->casting = 1;
         return 1;
     }
     return 0;
@@ -245,6 +284,7 @@ struct battlestate *battle_init(struct magruka *m) {
     struct playerdata *pd1 = malloc(sizeof *pd1),
                       *pd2 = malloc(sizeof *pd2);
     pd1->n = pd2->n = 0;
+    pd1->lhs[0] = pd1->rhs[0] = pd2->lhs[0] = pd2->rhs[0] = 0;
     pd1->timer = pd2->timer = 0;
     b->p1.data = pd1;
     b->p2.data = pd2;
@@ -257,6 +297,7 @@ struct battlestate *battle_init(struct magruka *m) {
 
     b->turn = 1;
     b->polling = 1;
+    b->casting = 0;
 
     return b;
 }
@@ -302,6 +343,16 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
                 case ',': if (b->page > 0) --b->page; break;
 
                 case ' ': b->lhf = b->rhf = 0; b->lh = b->rh = -1; break;
+
+                }
+            } else if (b->casting) {
+                struct playerdata *pd = CPD(b);
+                switch (m->e.key.keysym.sym) {
+
+                case 'r': if (pd->lha > 0)        { pd->lhb = pd->lha--; } break;
+                case 'f': if (pd->lhs[pd->lha+1]) { pd->lhb = pd->lha++; } break;
+                case 'u': if (pd->rha > 0)        { pd->rhb = pd->rha--; } break;
+                case 'j': if (pd->rhs[pd->rha+1]) { pd->rhb = pd->rha++; } break;
 
                 }
             }
@@ -360,15 +411,8 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
         struct spell *sp = m->spells;
         for (int i = 0; i < b->page * SPELLS_PER_PAGE; ++i) ++sp;
         for (int i = 0; sp->name[0] && i < SPELLS_PER_PAGE; ++sp, ++i) {
-            // draw spell name
             drawtext(m, SCREEN_WIDTH/2 - m->spellnamew - SPELL_LIST_PAD, ypos, sp->nameimg);
-            // draw gesture list
-            int xpos = SCREEN_WIDTH/2 + SPELL_LIST_PAD;
-            for (int i = 0; i < sp->ngest; ++i) {
-                anim(m, xpos, ypos, sp->gesture[i] > 0 ? m->img.key : m->img.keyboth, abs(sp->gesture[i]));
-                xpos += m->img.key.w + 2;
-            }
-            // next line
+            drawformula(m, SCREEN_WIDTH/2 + SPELL_LIST_PAD, ypos, sp);
             ypos += m->spellnameh + 4;
         }
 
@@ -377,6 +421,11 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
         if (poof & 2) dopoof(m, b->particles, RH_POS(m), 0);
         if ((poof & 4) && !b->lhf && b->lh != -1) dopoof(m, b->particles, LH_POS(m), 1);
         if ((poof & 8) && !b->rhf && b->rh != -1) dopoof(m, b->particles, RH_POS(m), 1);
+    } else if (b->casting) {
+        // draw possible spell list
+        struct playerdata *pd = CPD(b);
+        drawlist(m, SCREEN_WIDTH/2 - m->spellnamew - SPELL_LIST_PAD, 70, pd->lhs, pd->lha);
+        drawlist(m, SCREEN_WIDTH/2 + SPELL_LIST_PAD, 70, pd->rhs, pd->rha);
     }
 
     // draw wizards
