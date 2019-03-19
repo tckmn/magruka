@@ -33,6 +33,7 @@
 #define LH_POS(m) (SCREEN_WIDTH/2 - (m)->spellnamew - (m)->img.gesture.w - 20)
 #define RH_POS(m) (SCREEN_WIDTH/2 + (m)->spellnamew + 20)
 #define HAND_Y    200
+#define P2_STATUS_X 700
 
 #define GESTURE_DURATION 800
 

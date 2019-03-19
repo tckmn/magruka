@@ -92,7 +92,7 @@ void drawformula(struct magruka *m, int xpos, int ypos, struct spell *sp) {
     }
 }
 
-#define TARGET_Y 420
+#define TARGET_Y 385
 void drawlist(struct magruka *m, struct battlestate *b, int xpos, int ypos, struct spell **s, int a, int t, struct textimg label) {
     if (*s) {
         draw(m, xpos - SCALE1*3, TARGET_Y - SCALE1*3, m->img.targetchoose);
@@ -270,7 +270,8 @@ int add_gestures_func(struct magruka *m, struct battlestate *b, void *_) {
         pd->lha = pd->lhb = pd->rha = pd->rhb = 0;
         if (lc) pd->lht = !pd->lhs[0]->offensive;
         if (rc) pd->rht = !pd->rhs[0]->offensive;
-        b->casting = 1;
+        if (lc + rc) b->casting = 1;
+        else { b->turn = 3 - b->turn; b->polling = 1; }
         return 1;
     }
     return 0;
@@ -373,6 +374,12 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
                 case 'k': if (pd->rht > 0)            --pd->rht; break;
                 case 'l': if (pd->rht < b->nmons + 1) ++pd->rht; break;
 
+                case ' ':
+                    b->casting = 0;
+                    b->polling = 1;
+                    b->turn = 3 - b->turn;
+                    break;
+
                 }
             }
             break;
@@ -455,7 +462,10 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
     ypos = 5;
     ypos = drawhpbar(m, 5, ypos, 0, b->p1, -1) + STATUS_PAD;
     ypos = drawgest(m, 5, ypos, b->p1.data) + STATUS_PAD;
-    drawhpbar(m, SCREEN_WIDTH - 5, 5, 1, b->p2, -1);
+
+    ypos = 5;
+    ypos = drawhpbar(m, SCREEN_WIDTH - 5, 5, 1, b->p2, -1);
+    ypos = drawgest(m, P2_STATUS_X, ypos, b->p2.data) + STATUS_PAD;
 
     // draw held gestures
     if (b->lh != -1) anim(m, LH_POS(m), HAND_Y, b->lhf ? m->img.gesture : m->img.gesturefinal, b->lh);
@@ -468,9 +478,9 @@ int battle_main_loop(struct magruka *m, struct battlestate *b) {
     if (b->polling && b->lh != -1 && b->rh != -1 && !b->lhf && !b->rhf) {
         b->polling = 0;
         task_add(b->tasks,
-                creature_animate(&b->p1, 1, 3, 100), task_callback(
+                creature_animate(b->turn == 1 ? &b->p1 : &b->p2, 1, 3, 100), task_callback(
                 add_gestures(m, b), task_callback(
-                creature_animate(&b->p1, -1, 0, 100), 0)));
+                creature_animate(b->turn == 1 ? &b->p1 : &b->p2, -1, 0, 100), 0)));
     }
 
     // render everything
