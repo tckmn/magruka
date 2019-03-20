@@ -46,26 +46,26 @@ void alph(struct magruka *m, Uint8 a) {
     SDL_SetTextureAlphaMod(m->img.spritesheet, a);
 }
 
-void write(struct magruka *m, int x, int y, char *text) {
-    SDL_Rect src = {m->img.letters.x, m->img.letters.y, 0, m->img.letterh};
-    SDL_Rect dest = {x, y, 0, src.h};
-    for (; *text; ++text) {
-        if (*text == ' ') {
-            dest.x += 2*SCALE1 + SCALE1/2;
-        } else if (*text == '\n') {
-            dest.x = x;
-            dest.y += m->img.letterh;
-        } else {
-            int ch = 'A' <= *text && *text <= 'Z' ? *text - 'A' :
-                     'a' <= *text && *text <= 'z' ? *text - 'a' + 26 :
-                     '0' <= *text && *text <= '9' ? *text - '0' + 52 : 0;
-            src.x = m->img.letters.x + m->img.letterx[ch];
-            src.w = dest.w = m->img.letterw[ch];
-            SDL_RenderCopy(m->rend, m->img.spritesheet, &src, &dest);
-            dest.x += dest.w + SCALE1/2;
-        }
-    }
-}
+/* void write(struct magruka *m, int x, int y, char *text) { */
+/*     SDL_Rect src = {m->img.letters.x, m->img.letters.y, 0, m->img.letterh}; */
+/*     SDL_Rect dest = {x, y, 0, src.h}; */
+/*     for (; *text; ++text) { */
+/*         if (*text == ' ') { */
+/*             dest.x += 2*SCALE1 + SCALE1/2; */
+/*         } else if (*text == '\n') { */
+/*             dest.x = x; */
+/*             dest.y += m->img.letterh; */
+/*         } else { */
+/*             int ch = 'A' <= *text && *text <= 'Z' ? *text - 'A' : */
+/*                      'a' <= *text && *text <= 'z' ? *text - 'a' + 26 : */
+/*                      '0' <= *text && *text <= '9' ? *text - '0' + 52 : 0; */
+/*             src.x = m->img.letters.x + m->img.letterx[ch]; */
+/*             src.w = dest.w = m->img.letterw[ch]; */
+/*             SDL_RenderCopy(m->rend, m->img.spritesheet, &src, &dest); */
+/*             dest.x += dest.w + SCALE1/2; */
+/*         } */
+/*     } */
+/* } */
 
 /*
  * returns a textimg with a NULL texture on error

@@ -26,7 +26,7 @@ void drawex(struct magruka*, int, int, SDL_Rect, double, SDL_Point*, SDL_Rendere
 void anim(struct magruka*, int, int, SDL_Rect, int);
 void animex(struct magruka*, int, int, SDL_Rect, int, double, SDL_Point*, SDL_RendererFlip);
 void alph(struct magruka*, Uint8);
-void write(struct magruka*, int, int, char*);
+/* void write(struct magruka*, int, int, char*); */
 struct textimg gentext(struct magruka*, char*, SDL_Color);
 void drawtext(struct magruka*, int, int, struct textimg);
 int g2n(char);
